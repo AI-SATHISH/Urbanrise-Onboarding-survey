@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urbanrise — Day 1 Onboarding Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #f4f1ec;
+  --card: #ffffff;
+  --primary: #152d4a;
+  --accent: #c9581e;
+  --accent2: #e07b3c;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: rgba(0,0,0,0.09);
+  --green: #1e6b4a;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --radius: 12px;
+  --font-head: 'Outfit', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:var(--font-body);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+h1,h2,h3,h4{font-family:var(--font-head)}
+
+/* ── LAYOUT ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+.center{align-items:center;justify-content:center;flex-direction:column}
+
+/* ── LANDING ── */
+#s-landing{background:var(--primary);position:relative;overflow:hidden;padding:2rem}
+#s-landing::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%, rgba(201,88,30,0.18) 0%, transparent 60%),radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%)}
+.land-inner{position:relative;z-index:1;max-width:560px;width:100%;text-align:center}
+.land-logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:2.5rem}
+.land-logo .logo-mark{width:42px;height:42px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.land-logo .logo-mark svg{width:24px;height:24px;fill:white}
+.land-logo .logo-text{font-family:var(--font-head);font-size:22px;font-weight:700;color:white;letter-spacing:0.02em}
+.land-hero{font-family:var(--font-head);font-size:clamp(28px,5vw,44px);font-weight:700;color:white;line-height:1.2;margin-bottom:0.75rem}
+.land-sub{font-size:15px;color:rgba(255,255,255,0.6);margin-bottom:2.5rem;line-height:1.7}
+.land-divider{display:flex;align-items:center;gap:12px;margin-bottom:2.5rem}
+.land-divider span{font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-transform:uppercase}
+.land-divider::before,.land-divider::after{content:'';flex:1;height:0.5px;background:rgba(255,255,255,0.15)}
+.access-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
+.access-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:1.75rem 1.25rem;cursor:pointer;transition:all 0.2s;text-align:left}
+.access-card:hover{background:rgba(255,255,255,0.11);border-color:rgba(255,255,255,0.25);transform:translateY(-2px)}
+.access-card.admin{border-color:rgba(201,88,30,0.4);background:rgba(201,88,30,0.08)}
+.access-card.admin:hover{background:rgba(201,88,30,0.14);border-color:var(--accent)}
+.ac-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:20px}
+.ac-icon.res{background:rgba(255,255,255,0.1)}
+.ac-icon.adm{background:rgba(201,88,30,0.25)}
+.ac-title{font-family:var(--font-head);font-size:16px;font-weight:600;color:white;margin-bottom:4px}
+.ac-desc{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5}
+.land-footer{margin-top:2.5rem;font-size:12px;color:rgba(255,255,255,0.25)}
+
+/* ── ADMIN LOGIN MODAL ── */
+#s-admin-login{background:var(--bg);padding:2rem}
+.login-card{background:var(--card);border-radius:16px;padding:2.5rem 2rem;max-width:400px;width:100%;box-shadow:var(--shadow);border:1px solid var(--border)}
+.login-logo{display:flex;align-items:center;gap:9px;margin-bottom:2rem}
+.login-logo .lm{width:36px;height:36px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.login-logo .lm svg{width:20px;height:20px;fill:white}
+.login-logo span{font-family:var(--font-head);font-weight:700;font-size:18px;color:var(--primary)}
+.login-head{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:1.75rem}
+.fl{display:flex;flex-direction:column;gap:5px;margin-bottom:1.25rem}
+.fl label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fl input{border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.fl input:focus{border-color:var(--primary)}
+.err-msg{font-size:12px;color:#dc2626;background:#fef2f2;border-radius:7px;padding:8px 12px;display:none;margin-bottom:1rem}
+.btn-primary{width:100%;background:var(--primary);color:white;border:none;border-radius:9px;padding:12px;font-family:var(--font-head);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-primary:hover{opacity:0.88}
+.btn-back{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);margin-top:1rem;display:flex;align-items:center;gap:5px}
+.btn-back:hover{color:var(--primary)}
+
+/* ── SURVEY ── */
+#s-survey{background:var(--bg);flex-direction:column;padding:0}
+.survey-header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.sh-brand{display:flex;align-items:center;gap:9px}
+.sh-brand .sm{width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.sh-brand .sm svg{width:17px;height:17px;fill:white}
+.sh-brand span{font-family:var(--font-head);font-weight:700;font-size:16px;color:var(--primary)}
+.sh-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.sh-step{font-size:12px;color:var(--muted)}
+.progress-bar{width:160px;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden}
+.progress-fill{height:4px;background:var(--accent);border-radius:2px;transition:width .4s ease}
+.survey-body{flex:1;max-width:760px;width:100%;margin:0 auto;padding:2rem 1.5rem}
+.step-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);background:rgba(201,88,30,0.1);border-radius:20px;padding:4px 12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.75rem}
+.step-title{font-family:var(--font-head);font-size:24px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.section-label{font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.625rem;border-bottom:1px solid var(--border)}
+.q-label{font-size:14px;color:var(--text);margin-bottom:10px;font-weight:400;line-height:1.5}
+.q-label strong{font-weight:500}
+.q-block{margin-bottom:1.5rem}
+.q-block:last-child{margin-bottom:0}
+
+/* Rating stars */
+.rating-table{width:100%;border-collapse:collapse}
+.rating-table tr{border-bottom:1px solid var(--border)}
+.rating-table tr:last-child{border-bottom:none}
+.rating-table td{padding:10px 0;font-size:13px;color:var(--text);vertical-align:middle}
+.rating-table td:first-child{padding-right:12px;line-height:1.4}
+.rating-table td:last-child{white-space:nowrap;text-align:right}
+.stars{display:inline-flex;gap:3px}
+.star{font-size:22px;cursor:pointer;color:#d1d5db;transition:color .15s;line-height:1;-webkit-text-stroke:1px #9ca3af}
+.star.on{color:#f59e0b;-webkit-text-stroke:0}
+.star:hover{color:#f59e0b}
+.rating-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Radio options */
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font-size:13px;cursor:pointer;padding:7px 14px;border:1.5px solid var(--border);border-radius:20px;color:var(--text);transition:all .15s;background:var(--bg);user-select:none;white-space:nowrap}
+.opt:hover{border-color:var(--accent2)}
+.opt.sel{border-color:var(--accent);background:rgba(201,88,30,0.08);color:var(--accent);font-weight:500}
+
+/* Yes/No */
+.yn-grid{display:flex;flex-direction:column;gap:8px}
+.yn-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:9px;gap:12px}
+.yn-row-label{font-size:13px;color:var(--text);flex:1;line-height:1.4}
+.yn-btns{display:flex;gap:6px;flex-shrink:0}
+.yn-btn{font-size:12px;font-weight:500;padding:5px 14px;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;transition:all .15s;background:var(--card);color:var(--muted)}
+.yn-btn.yes.sel{border-color:var(--green);background:rgba(30,107,74,0.08);color:var(--green)}
+.yn-btn.no.sel{border-color:#dc2626;background:rgba(220,38,38,0.07);color:#dc2626}
+
+/* Multi-select checkboxes */
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.chk{font-size:13px;cursor:pointer;padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;color:var(--text);transition:all .15s;background:var(--bg);user-select:none}
+.chk:hover{border-color:var(--accent2)}
+.chk.sel{border-color:var(--accent);background:rgba(201,88,30,0.08);color:var(--accent)}
+
+/* NPS */
+.nps-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.nps-btn{width:50px;height:50px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-size:15px;font-weight:600;background:var(--bg);color:var(--text);transition:all .15s;font-family:var(--font-head)}
+.nps-btn:hover{border-color:var(--accent2)}
+.nps-btn.sel-det{background:#fef2f2;border-color:#f87171;color:#b91c1c}
+.nps-btn.sel-pas{background:#fff7ed;border-color:#fb923c;color:#c2410c}
+.nps-btn.sel-pro{background:#f0fdf4;border-color:#4ade80;color:#15803d}
+.nps-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+.nps-scale-info{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.nps-tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.nps-tag.d{background:#fef2f2;color:#b91c1c}
+.nps-tag.p{background:#fff7ed;color:#c2410c}
+.nps-tag.pr{background:#f0fdf4;color:#15803d}
+
+/* Textarea */
+.q-textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--bg);resize:vertical;min-height:90px;outline:none;transition:border-color .2s;line-height:1.6}
+.q-textarea:focus{border-color:var(--primary)}
+
+/* Input */
+.q-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.q-input:focus{border-color:var(--primary)}
+.step-error{display:none;background:#fef2f2;border:1px solid rgba(220,38,38,0.18);color:#b91c1c;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;margin:0 0 1rem 0}
+.field-error{border-color:#dc2626 !important;box-shadow:0 0 0 3px rgba(220,38,38,0.08)}
+.group-error{border:1.5px solid rgba(220,38,38,0.35);border-radius:10px;padding:10px}
+.q-label .req{color:#dc2626;font-weight:700;margin-left:4px}
+
+/* Grid inputs */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Survey footer */
+.survey-footer{background:var(--card);border-top:1px solid var(--border);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;bottom:0}
+.btn-prev{background:none;border:1.5px solid var(--border);border-radius:9px;padding:10px 20px;font-family:var(--font-head);font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-prev:hover{border-color:var(--primary);color:var(--primary)}
+.btn-next{background:var(--primary);color:white;border:none;border-radius:9px;padding:10px 28px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;gap:6px}
+.btn-next:hover{opacity:.88}
+.btn-submit{background:var(--accent);color:white;border:none;border-radius:9px;padding:10px 28px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-submit:hover{opacity:.88}
+
+/* ── THANK YOU ── */
+#s-thankyou{background:var(--primary);text-align:center;padding:2rem}
+.ty-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:3rem 2rem;max-width:460px;width:100%}
+.ty-icon{width:72px;height:72px;background:rgba(201,88,30,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:34px}
+.ty-title{font-family:var(--font-head);font-size:28px;font-weight:700;color:white;margin-bottom:0.75rem}
+.ty-sub{font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:2rem}
+.ty-btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ty-btn-sec{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:white;border-radius:9px;padding:10px 20px;font-family:var(--font-head);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.ty-btn-sec:hover{background:rgba(255,255,255,0.14)}
+
+/* ── DASHBOARD ── */
+#s-dashboard{background:var(--bg);flex-direction:column;padding:0}
+.dash-header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+.dh-brand{display:flex;align-items:center;gap:10px}
+.dh-brand .dm{width:34px;height:34px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.dh-brand .dm svg{width:19px;height:19px;fill:white}
+.dh-title{font-family:var(--font-head);font-size:17px;font-weight:700;color:white}
+.dh-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px}
+.dash-badge{font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;letter-spacing:.06em;text-transform:uppercase}
+.btn-logout{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.btn-logout:hover{background:rgba(255,255,255,0.14)}
+.btn-export{background:rgba(30,107,74,0.25);border:1px solid rgba(74,222,128,0.35);color:#4ade80;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-export:hover{background:rgba(30,107,74,0.4);border-color:#4ade80}
+.btn-export:disabled{opacity:0.5;cursor:not-allowed}
+.dash-body{padding:1.75rem 1.5rem;max-width:1100px;width:100%;margin:0 auto}
+.dash-section-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.dash-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:2rem}
+.kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:1.25rem 1.25rem 1rem;box-shadow:var(--shadow)}
+.kpi-val{font-family:var(--font-head);font-size:34px;font-weight:700;color:var(--primary);line-height:1}
+.kpi-lbl{font-size:12px;color:var(--muted);margin-top:6px}
+.kpi-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+
+/* Charts */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:2rem}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow)}
+.chart-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--primary);margin-bottom:0.25rem}
+.chart-sub{font-size:12px;color:var(--muted);margin-bottom:1rem}
+.chart-full{grid-column:1/-1}
+.chart-wrap{position:relative;width:100%}
+
+/* Feedback cards */
+.fb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:2rem}
+.fb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow)}
+.fb-card-head{display:flex;align-items:center;gap:7px;margin-bottom:0.875rem}
+.fb-card-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fb-card-type{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.fb-item{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);line-height:1.5}
+.fb-item:last-child{border-bottom:none;padding-bottom:0}
+.fb-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.empty-state{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+
+/* Response table */
+.resp-table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);margin-bottom:2rem}
+.resp-table{width:100%;border-collapse:collapse;font-size:13px}
+.resp-table th{background:var(--bg);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);white-space:nowrap}
+.resp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+.resp-table tr:last-child td{border-bottom:none}
+.resp-table tr:hover td{background:var(--bg)}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge.g{background:#f0fdf4;color:#15803d}
+.badge.y{background:#fff7ed;color:#c2410c}
+.badge.r{background:#fef2f2;color:#b91c1c}
+.star-disp{color:#f59e0b;font-size:13px}
+
+/* No data */
+.no-data{text-align:center;padding:4rem 2rem;color:var(--muted)}
+.no-data-icon{font-size:48px;margin-bottom:1rem}
+.no-data h3{font-family:var(--font-head);font-size:20px;color:var(--primary);margin-bottom:0.5rem}
+.no-data p{font-size:14px;line-height:1.6}
+
+@media(max-width:640px){
+  .access-cards{grid-template-columns:1fr}
+  .chart-grid,.chart-grid-3{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .dash-header{padding:14px 16px}
+  .dash-body{padding:1rem}
+  .survey-body{padding:1.25rem 1rem}
+  .nps-btn{width:42px;height:42px;font-size:13px}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ LANDING ════════════ -->
+<div id="s-landing" class="screen active center">
+  <div class="land-inner">
+    <div class="land-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/><rect x="9" y="14" width="6" height="7" fill="rgba(255,255,255,0.3)"/></svg>
+      </div>
+      <div class="logo-text">Urbanrise</div>
+    </div>
+    <div class="land-hero">Day 1 Onboarding<br>Experience Survey</div>
+    <div class="land-sub">From First Contact to Your First Day —<br>Your Voice Shapes Our Future</div>
+    <div class="land-divider"><span>Choose your access</span></div>
+    <div class="access-cards">
+      <div class="access-card" onclick="gotoSurvey()">
+        <div class="ac-icon res">📝</div>
+        <div class="ac-title">Take the Survey</div>
+        <div class="ac-desc">New joiners — share your onboarding experience with us</div>
+      </div>
+      <div class="access-card admin" onclick="showAdminLogin()">
+        <div class="ac-icon adm">📊</div>
+        <div class="ac-title">Admin Dashboard</div>
+        <div class="ac-desc">HR leadership — view analytics and survey responses</div>
+      </div>
+    </div>
+    <div class="land-footer">Confidential · Urbanrise Human Resources · 2025</div>
+  </div>
+</div>
+
+<!-- ════════════ ADMIN LOGIN ════════════ -->
+<div id="s-admin-login" class="screen center">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="lm"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/><rect x="9" y="14" width="6" height="7" fill="rgba(255,255,255,0.3)"/></svg></div>
+      <span>Urbanrise</span>
+    </div>
+    <div class="login-head">Admin Login</div>
+    <div class="login-sub">Access the HR Dashboard to view responses and analytics</div>
+    <div id="login-err" class="err-msg">Incorrect password. Please try again.</div>
+    <div class="fl"><label>Admin Password</label><input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdmin()"></div>
+    <button class="btn-primary" onclick="checkAdmin()">Access Dashboard →</button>
+    <div style="text-align:center"><button class="btn-back" onclick="showScreen('s-landing')">← Back to Home</button></div>
+    <div style="margin-top:1.5rem;padding:12px;background:rgba(201,88,30,0.06);border-radius:9px;border:1px dashed rgba(201,88,30,0.3)">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Demo Credentials</div>
+      <div style="font-size:13px;color:var(--text)">Password: <strong>Admin@2025</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SURVEY ════════════ -->
+<div id="s-survey" class="screen" style="flex-direction:column">
+  <div class="survey-header">
+    <div class="sh-brand">
+      <div class="sm"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/><rect x="9" y="14" width="6" height="7" fill="rgba(255,255,255,0.3)"/></svg></div>
+      <span>Urbanrise</span>
+    </div>
+    <div class="sh-right">
+      <div class="sh-step" id="step-label">Step 1 of 7</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:14.3%"></div></div>
+    </div>
+  </div>
+  <div class="survey-body" id="survey-body"></div>
+  <div class="survey-footer">
+    <button class="btn-prev" id="btn-prev" onclick="prevStep()">← Previous</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn-next" id="btn-next" onclick="nextStep()">Next →</button>
+      <button class="btn-submit" id="btn-submit" style="display:none" onclick="submitSurvey()">Submit Survey ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ THANK YOU ════════════ -->
+<div id="s-thankyou" class="screen center">
+  <div class="ty-card">
+    <div class="ty-icon">🎉</div>
+    <div class="ty-title">Thank You!</div>
+    <div class="ty-sub">Your feedback is a gift to our organisation. Every response is read, analysed, and acted upon by the HR leadership team at Urbanrise.<br><br><strong style="color:rgba(255,255,255,0.85)">Welcome aboard — let's build something great together!</strong></div>
+    <div class="ty-btn-row">
+      <button class="ty-btn-sec" onclick="gotoSurvey()">Submit Another Response</button>
+      <button class="ty-btn-sec" onclick="showScreen('s-landing')" style="background:rgba(201,88,30,0.25);border-color:rgba(201,88,30,0.5)">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ DASHBOARD ════════════ -->
+<div id="s-dashboard" class="screen" style="flex-direction:column">
+  <div class="dash-header">
+    <div class="dh-brand">
+      <div class="dm"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/><rect x="9" y="14" width="6" height="7" fill="rgba(255,255,255,0.3)"/></svg></div>
+      <div>
+        <div class="dh-title">HR Analytics Dashboard</div>
+        <div class="dh-sub">Day 1 Onboarding Experience Survey</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="dash-badge">Admin View</div>
+      <button class="btn-export" onclick="exportToExcel()" title="Download all responses as Excel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Excel
+      </button>
+      <button class="btn-logout" onclick="showScreen('s-landing')">← Exit</button>
+    </div>
+  </div>
+  <div class="dash-body" id="dash-body"></div>
+</div>
+
+<script>
+// ═══════════ STATE ═══════════
+const ADMIN_PW = 'Admin@2025';
+const STORE_KEY = 'ur_responses_v2';
+let currentStep = 0;
+const TOTAL_STEPS = 7;
+let response = {};
+let activeCharts = [];
+
+// ═══════════ NAVIGATION ═══════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showAdminLogin() {
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('login-err').style.display = 'none';
+  showScreen('s-admin-login');
+}
+
+async function checkAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PW) {
+    showScreen('s-dashboard');
+    await renderDashboard();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('admin-pw').focus();
+  }
+}
+
+function gotoSurvey() {
+  currentStep = 0;
+  response = initResponse();
+  renderStep();
+  showScreen('s-survey');
+}
+
+// ═══════════ STORAGE ═══════════
+function loadResponses() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch { return []; }
+}
+function saveResponse(r) {
+  const all = loadResponses();
+  all.push(r);
+  localStorage.setItem(STORE_KEY, JSON.stringify(all));
+}
+
+// ═══════════ RESPONSE INIT ═══════════
+function initResponse() {
+  return {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    ts: new Date().toISOString(),
+    name:'', empId:'', role:'', dept:'', doj:'', loc:'', mgr:'', src:'',
+    a_t1:[0,0,0,0], a_q1:'', a_q2:'',
+    a_t2:[0,0,0],
+    b_t3:[0,0,0,0], b_q4:'', b_q5:'',
+    b_t4:[0,0,0,0,0], b_q6:'',
+    b_t5:[0,0,0], b_q7:'',
+    c_t6:[0,0,0,0,0], c_q8:'',
+    c_t7:[0,0,0,0,0],
+    c_yn1:'', c_yn2:'', c_yn3:'', c_yn4:'',
+    c_q9:'', c_q10:'',
+    d_t8:[0,0,0],
+    d_yn1:'', d_yn2:'', d_yn3:'',
+    d_q11:'',
+    f_t9:[0,0,0,0,0,0,0,0,0],
+    f_t10:[0,0,0,0], f_q12:'', f_q13:[], f_q14:[], f_q15:'',
+    g_t11:[0,0,0,0,0],
+    g_yn1:'', g_yn2:'', g_yn3:'',
+    g_q16:[], g_q17:'',
+    g_t12:[0,0,0,0],
+    o_r:[0,0,0,0,0], o_nps:-1,
+    o_q19:'', o_q20:'', o_q21:'', o_q22:''
+  };
+}
+
+// ═══════════ SURVEY STEPS ═══════════
+const steps = [
+  {badge:'Respondent Information', title:'Tell us about yourself', desc:'This information helps us classify and act on your feedback effectively. All fields in this survey are mandatory.'},
+  {badge:'Part A', title:'Recruiter Contact & Role Clarity', desc:'Please rate your initial interaction with our recruitment team. (1 = Very Poor | 5 = Excellent)'},
+  {badge:'Part B', title:'Interview & Selection Experience', desc:'Rate your experience with the interview coordination, panel, and selection communication.'},
+  {badge:'Part C', title:'Offer Letter & Pre-Joining', desc:'Rate the offer communication and the support you received between acceptance and joining.'},
+  {badge:'Part D', title:'Day 1 Arrival & Reception', desc:'Rate your experience from the moment you arrived at the Urbanrise office on Day 1.'},
+  {badge:'Part F & G', title:'Orientation & Workspace Readiness', desc:'Rate the orientation program quality and readiness of your workspace and tools.'},
+  {badge:'Overall', title:'Overall Satisfaction & Feedback', desc:'Share your overall ratings and open thoughts — your words directly shape how we improve.'},
+];
+
+function renderStep() {
+  const s = steps[currentStep];
+  document.getElementById('step-label').textContent = `Step ${currentStep+1} of ${TOTAL_STEPS}`;
+  document.getElementById('prog-fill').style.width = `${((currentStep+1)/TOTAL_STEPS)*100}%`;
+  document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').style.display = currentStep === TOTAL_STEPS-1 ? 'none' : 'flex';
+  document.getElementById('btn-submit').style.display = currentStep === TOTAL_STEPS-1 ? 'inline-block' : 'none';
+
+  const body = document.getElementById('survey-body');
+  body.innerHTML = `
+    <div class="step-badge">${s.badge}</div>
+    <div class="step-title">${s.title}</div>
+    <div class="step-desc">${s.desc}</div>
+    <div class="step-error" id="step-error"></div>
+    ${stepHTML[currentStep]()}
+  `;
+  body.scrollTo(0,0);
+  window.scrollTo(0,0);
+  bindStep();
+}
+
+// ─── HTML builders ───
+const stepHTML = [
+  // Step 0 – Info
+  () => `
+    <div class="section-card">
+      <div class="section-label">Your Details</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="q-block"><div class="q-label">Full Name <span class="req">*</span></div>
+          <input class="q-input" id="i-name" placeholder="Your name" value="${response.name}"></div>
+        <div class="q-block"><div class="q-label">Employee ID <span class="req">*</span></div>
+          <input class="q-input" id="i-empid" placeholder="EMP-0000" value="${response.empId}"></div>
+      </div>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="q-block"><div class="q-label">Designation / Role <span class="req">*</span></div>
+          <input class="q-input" id="i-role" placeholder="e.g. Senior Manager" value="${response.role}"></div>
+        <div class="q-block"><div class="q-label">Department / Business Unit <span class="req">*</span></div>
+          <input class="q-input" id="i-dept" placeholder="e.g. Sales, HR, Finance" value="${response.dept}"></div>
+      </div>
+      <div class="g2" style="margin-bottom:12px">
+        <div class="q-block"><div class="q-label">Date of Joining <span class="req">*</span></div>
+          <input class="q-input" type="date" id="i-doj" value="${response.doj}"></div>
+        <div class="q-block"><div class="q-label">Reporting Location / Site <span class="req">*</span></div>
+          <input class="q-input" id="i-loc" placeholder="e.g. Chennai HQ" value="${response.loc}"></div>
+      </div>
+      <div class="q-block"><div class="q-label">Reporting Manager's Name <span class="req">*</span></div>
+        <input class="q-input" id="i-mgr" placeholder="Manager's name" value="${response.mgr}"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Source of Application <span class="req">*</span></div>
+      <div class="opts" id="src-opts">
+        ${['Job Portal','LinkedIn','Referral','Campus','Direct Approach','Other'].map(o=>`<div class="opt${response.src===o?' sel':''}" data-val="${o}" data-field="src">${o}</div>`).join('')}
+      </div>
+    </div>`,
+
+  // Step 1 – Part A
+  () => `
+    <div class="section-card">
+      <div class="section-label">Touchpoint 1 — First Contact by Recruiter</div>
+      <div id="a_t1-0">${ratingTable([
+        "Clarity and professionalism of the recruiter's initial communication",
+        'Accuracy of information shared about the role and Urbanrise',
+        'Responsiveness of the recruiter to your initial queries',
+        'Overall impression created by the recruiter in the first conversation'
+      ], 'a_t1')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q1.</strong> How did the recruiter first contact you? <span class="req">*</span></div>
+        <div class="opts" id="aq1-opts">
+          ${['Phone Call','Email','LinkedIn Message','WhatsApp','Through a Referral','Other'].map(o=>`<div class="opt${response.a_q1===o?' sel':''}" data-val="${o}" data-field="a_q1">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q2.</strong> Did the recruiter clearly explain the job role, responsibilities, and team structure? <span class="req">*</span></div>
+        <div class="opts" id="aq2-opts">
+          ${['Yes, very clearly','Somewhat clearly','It was vague','Not at all'].map(o=>`<div class="opt${response.a_q2===o?' sel':''}" data-val="${o}" data-field="a_q2">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 2 — Job Description & Role Clarity</div>
+      <div id="a_t2-0">${ratingTable([
+        'Clarity and accuracy of the Job Description provided',
+        'Alignment of the role described versus the actual position',
+        'Information provided about the team, growth path, and expectations'
+      ], 'a_t2')}</div>
+    </div>`,
+
+  // Step 2 – Part B
+  () => `
+    <div class="section-card">
+      <div class="section-label">Touchpoint 3 — Interview Scheduling & Logistics</div>
+      <div id="b_t3-0">${ratingTable([
+        'Ease of scheduling the interview (flexibility of slots offered)',
+        'Timeliness and advance notice provided before interviews',
+        'Clarity of interview format and instructions communicated',
+        'Professionalism of the interview coordination team'
+      ], 'b_t3')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q4.</strong> How many rounds of interviews did you go through? <span class="req">*</span></div>
+        <div class="opts" id="bq4-opts">
+          ${['1 round','2 rounds','3 rounds','4 or more rounds'].map(o=>`<div class="opt${response.b_q4===o?' sel':''}" data-val="${o}" data-field="b_q4">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q5.</strong> What was the mode of your interview(s)? <span class="req">*</span></div>
+        <div class="opts" id="bq5-opts">
+          ${['In-person only','Virtual only (video call)','Telephonic only','Combination of modes'].map(o=>`<div class="opt${response.b_q5===o?' sel':''}" data-val="${o}" data-field="b_q5">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 4 — Interview Experience & Panel Behaviour</div>
+      <div id="b_t4-0">${ratingTable([
+        'Professionalism and respect shown by interviewers',
+        'Relevance and quality of questions asked during the interview',
+        'Fairness and objectivity of the interview process',
+        'Opportunity given to you to ask questions and clarify doubts',
+        'Overall comfort level during the interview'
+      ], 'b_t4')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q6.</strong> Were you given a fair and adequate opportunity to showcase your skills? <span class="req">*</span></div>
+        <div class="opts" id="bq6-opts">
+          ${['Yes, absolutely','Mostly yes','Somewhat','No, not really'].map(o=>`<div class="opt${response.b_q6===o?' sel':''}" data-val="${o}" data-field="b_q6">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 5 — Feedback & Selection Communication</div>
+      <div id="b_t5-0">${ratingTable([
+        'Timeliness of interview outcome / result communication',
+        'Clarity of the selection or rejection communication',
+        'Professionalism of the offer or feedback call / message'
+      ], 'b_t5')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q7.</strong> How long did it take to receive the final offer after your last interview? <span class="req">*</span></div>
+        <div class="opts" id="bq7-opts">
+          ${['Same day','Within 2–3 days','Within a week','More than a week','More than 2 weeks'].map(o=>`<div class="opt${response.b_q7===o?' sel':''}" data-val="${o}" data-field="b_q7">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>`,
+
+  // Step 3 – Part C
+  () => `
+    <div class="section-card">
+      <div class="section-label">Touchpoint 6 — Offer Letter & Compensation</div>
+      <div id="c_t6-0">${ratingTable([
+        'Clarity and completeness of the offer letter',
+        'Alignment of offer with what was discussed during the process',
+        'Timeliness of receiving the offer letter after verbal offer',
+        'Transparency and fairness of the compensation negotiation',
+        'Quality and professionalism of the offer letter document'
+      ], 'c_t6')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q8.</strong> Was your offer letter issued within the committed timeline? <span class="req">*</span></div>
+        <div class="opts" id="cq8-opts">
+          ${['Yes, on time','Slightly delayed','Significantly delayed','No timeline was communicated'].map(o=>`<div class="opt${response.c_q8===o?' sel':''}" data-val="${o}" data-field="c_q8">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 7 — Pre-Joining Communication & Documentation</div>
+      <div id="c_t7-0">${ratingTable([
+        'Clarity of documents required for joining',
+        'Support provided for completing background verification',
+        'Proactive communication from HR during the notice period',
+        'Ease of completing pre-joining formalities and form filling',
+        'Responsiveness of HR to your queries before joining'
+      ], 'c_t7')}</div>
+      <div class="yn-grid" style="margin-top:1rem">
+        <div id="c_yn1">${ynRow('Did you receive a clear joining checklist before your joining date?','c_yn1')}</div>
+        <div id="c_yn2">${ynRow('Were you informed about your reporting location, time, and person to report to?','c_yn2')}</div>
+        <div id="c_yn3">${ynRow('Did you receive a welcome kit or joining instructions prior to Day 1?','c_yn3')}</div>
+        <div id="c_yn4">${ynRow('Were your logistical queries (travel, accommodation, etc.) addressed by HR?','c_yn4')}</div>
+      </div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q9.</strong> How would you describe the overall pre-joining communication from Urbanrise? <span class="req">*</span></div>
+        <div class="opts" id="cq9-opts">
+          ${['Excellent — I felt fully prepared','Good — mostly covered','Average — some gaps','Poor — I was largely unprepared'].map(o=>`<div class="opt${response.c_q9===o?' sel':''}" data-val="${o}" data-field="c_q9">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q10.</strong> Is there anything specific that was missing or could have been communicated better before joining? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-c_q10" placeholder="Share your thoughts...">${response.c_q10}</textarea>
+      </div>
+    </div>`,
+
+  // Step 4 – Part D
+  () => `
+    <div class="section-card">
+      <div class="section-label">Touchpoint 8 — Arrival, Security & Reception</div>
+      <div id="d_t8-0">${ratingTable([
+        'Ease of locating the office / reporting location on Day 1',
+        'Welcome received at the reception / security gate',
+        'Professionalism and friendliness of front desk / security staff'
+      ], 'd_t8')}</div>
+      <div class="yn-grid" style="margin-top:1rem">
+        <div id="d_yn1">${ynRow('Were you expected and recognised when you arrived? (Was your arrival pre-informed to reception?)','d_yn1')}</div>
+        <div id="d_yn2">${ynRow('Was someone designated to receive you and guide you on Day 1?','d_yn2')}</div>
+        <div id="d_yn3">${ynRow('Was there a dedicated welcome kit or desk setup ready for you on arrival?','d_yn3')}</div>
+      </div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q11.</strong> How did your arrival at Urbanrise make you feel on Day 1? <span class="req">*</span></div>
+        <div class="opts" id="dq11-opts">
+          ${['Very welcomed and excited','Welcomed','Neutral','Slightly uncomfortable','Unwelcomed / anxious'].map(o=>`<div class="opt${response.d_q11===o?' sel':''}" data-val="${o}" data-field="d_q11">${o}</div>`).join('')}
+        </div>
+      </div>
+    </div>`,
+
+  // Step 5 – Part F & G
+  () => `
+    <div class="section-card">
+      <div class="section-label">Touchpoint 9 — Orientation Content & Delivery</div>
+      <div id="f_t9-0">${ratingTable([
+        'Introduction to Urbanrise — Vision, Mission, and Core Values',
+        'Overview of organisational structure and key leadership',
+        'Introduction to HR policies, benefits, and leave management',
+        'Overview of business units and projects',
+        'Compliance, code of conduct, and POSH awareness briefing',
+        'Role-specific Orientation Plan',
+        'IT and systems orientation & training',
+        'Welcome Kit with Branding',
+        'Overall structure and flow of the orientation program'
+      ], 'f_t9')}</div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 10 — Orientation Facilitators & Engagement</div>
+      <div id="f_t10-0">${ratingTable([
+        'Knowledge and preparedness of orientation facilitators',
+        'Engagement level and interactive quality of the session',
+        'Opportunity to ask questions and get them addressed',
+        'Time management and scheduling of the orientation'
+      ], 'f_t10')}</div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q12.</strong> How was the orientation conducted? <span class="req">*</span></div>
+        <div class="opts" id="fq12-opts">
+          ${['In-person group session','One-on-one with HR','Virtual session (online)','Self-paced (reading materials/portal)','Combination'].map(o=>`<div class="opt${response.f_q12===o?' sel':''}" data-val="${o}" data-field="f_q12">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q13.</strong> Which topics were covered adequately? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="checks" id="fq13-checks">
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q13.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q13">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q14.</strong> Which topics needed more depth or were missing? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="checks" id="fq14-checks">
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q14.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q14">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q15.</strong> What is the single most useful thing you learned during today's orientation? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-f_q15" placeholder="Share what stood out most...">${response.f_q15}</textarea>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 11 — Seating, Equipment & IT Setup</div>
+      <div id="g_t11-0">${ratingTable([
+        'Availability and readiness of your workstation / desk / cabin',
+        'Availability of required IT hardware (laptop, desktop, phone, etc.)',
+        'System access, login credentials, and network connectivity',
+        'Availability of necessary software and tools for your role',
+        'Overall IT and infrastructure setup experience'
+      ], 'g_t11')}</div>
+      <div class="yn-grid" style="margin-top:1rem">
+        <div id="g_yn1">${ynRow('Were your system access and login credentials available on Day 1?','g_yn1')}</div>
+        <div id="g_yn2">${ynRow('Was your email ID created and functional on Day 1?','g_yn2')}</div>
+        <div id="g_yn3">${ynRow('Was your OB access enabled on Day 1?','g_yn3')}</div>
+      </div>
+      <div class="q-block" style="margin-top:1.25rem">
+        <div class="q-label"><strong>Q16.</strong> Which of the following was NOT ready on your Day 1? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="checks" id="gq16-checks">
+          ${['Laptop / Desktop','Email Access','System Login Credentials','Access Card / ID Badge','Seating / Workstation','Software Tools','OB Login','Everything was ready'].map(o=>`<div class="chk${response.g_q16.includes(o)?' sel':''}" data-val="${o}" data-arr="g_q16">${o}</div>`).join('')}
+        </div>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q17.</strong> Please describe any infrastructure or access issues you faced on Day 1. <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-g_q17" placeholder="Describe any issues and how they impacted you...">${response.g_q17}</textarea>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Touchpoint 12 — Introduction to Team & Manager</div>
+      <div id="g_t12-0">${ratingTable([
+        'Quality of introduction to your immediate team and colleagues',
+        'Warmth and approachability of your reporting manager',
+        'Time spent by your manager orienting you to the role',
+        'Feeling of inclusion and belonging from your team'
+      ], 'g_t12')}</div>
+    </div>`,
+
+  // Step 6 – Overall
+  () => `
+    <div class="section-card">
+      <div class="section-label">Overall Satisfaction Ratings</div>
+      <div id="o_r-0">${ratingTable([
+        'Overall Candidate Experience (Recruitment Phase)',
+        'Overall Onboarding & Orientation Experience (Day 1)',
+        'Your confidence level in your decision to join Urbanrise',
+        'Your excitement about your role and the team',
+        "Your feeling of alignment with Urbanrise's culture and values"
+      ], 'o_r')}</div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Net Promoter Score — Urbanrise as an Employer</div>
+      <div class="q-label"><strong>Q18.</strong> On a scale of 0–10, how likely are you to recommend Urbanrise as a great place to work? <span class="req">*</span></div>
+      <div class="nps-row" id="nps-row">
+        ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
+          let cls = n<=6?'nps-d':n<=8?'nps-pas':'nps-pr';
+          let sel = response.o_nps===n?' '+cls:'';
+          return `<button class="nps-btn${sel}" data-n="${n}" onclick="setNPS(${n})">${n}</button>`;
+        }).join('')}
+      </div>
+      <div class="nps-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
+      <div class="nps-scale-info" style="margin-top:10px">
+        <span class="nps-tag d">0–6 Detractors</span>
+        <span class="nps-tag p">7–8 Passives</span>
+        <span class="nps-tag pr">9–10 Promoters</span>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Open Feedback</div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q19.</strong> What was the BEST part of your candidate and Day 1 onboarding experience at Urbanrise? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q19" placeholder="Share what impressed you most...">${response.o_q19}</textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q20.</strong> What could Urbanrise have done DIFFERENTLY to make your joining experience better? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q20" placeholder="Constructive suggestions are welcome...">${response.o_q20}</textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q21.</strong> Do you have any specific suggestions for improving our recruitment or onboarding process? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q21" placeholder="Your ideas matter...">${response.o_q21}</textarea>
+      </div>
+      <div class="q-block">
+        <div class="q-label"><strong>Q22.</strong> Any other comments, observations, or appreciation you would like to share? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q22" placeholder="Anything else on your mind...">${response.o_q22}</textarea>
+      </div>
+    </div>`,
+];
+
+// ─── Helper: rating table ───
+function ratingTable(qs, field) {
+  return `<table class="rating-table">${qs.map((q,i)=>`
+    <tr>
+      <td>${q}</td>
+      <td><div class="stars" data-field="${field}" data-idx="${i}">
+        ${[1,2,3,4,5].map(n=>`<span class="star${(response[field]&&response[field][i]>=n)?' on':''}" data-n="${n}">★</span>`).join('')}
+      </div></td>
+    </tr>`).join('')}</table>`;
+}
+
+// ─── Helper: yes/no row ───
+function ynRow(label, field) {
+  return `<div class="yn-row">
+    <div class="yn-row-label">${label}</div>
+    <div class="yn-btns">
+      <div class="yn-btn yes${response[field]==='Yes'?' sel':''}" data-field="${field}" data-val="Yes">Yes</div>
+      <div class="yn-btn no${response[field]==='No'?' sel':''}" data-field="${field}" data-val="No">No</div>
+    </div>
+  </div>`;
+}
+
+// ─── Bind interactions ───
+function bindStep() {
+  // Stars
+  document.querySelectorAll('.stars').forEach(starGroup => {
+    const field = starGroup.dataset.field;
+    const idx = parseInt(starGroup.dataset.idx);
+    starGroup.querySelectorAll('.star').forEach(star => {
+      star.addEventListener('click', () => {
+        const n = parseInt(star.dataset.n);
+        response[field][idx] = n;
+        starGroup.querySelectorAll('.star').forEach((s,si) => {
+          s.classList.toggle('on', si < n);
+        });
+      });
+    });
+  });
+
+  // Radio options
+  document.querySelectorAll('.opts .opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const field = opt.dataset.field;
+      response[field] = opt.dataset.val;
+      opt.closest('.opts').querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+      opt.classList.add('sel');
+    });
+  });
+
+  // Yes/No
+  document.querySelectorAll('.yn-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const field = btn.dataset.field;
+      const val = btn.dataset.val;
+      response[field] = val;
+      btn.closest('.yn-btns').querySelectorAll('.yn-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    });
+  });
+
+  // Checkboxes (multi-select)
+  document.querySelectorAll('.chk').forEach(chk => {
+    chk.addEventListener('click', () => {
+      const arr = chk.dataset.arr;
+      const val = chk.dataset.val;
+      const i = response[arr].indexOf(val);
+      if (i > -1) { response[arr].splice(i,1); chk.classList.remove('sel'); }
+      else { response[arr].push(val); chk.classList.add('sel'); }
+    });
+  });
+
+  // Textareas / inputs
+  ['name','empId','role','dept','doj','loc','mgr'].forEach(f => {
+    const map = {name:'i-name',empId:'i-empid',role:'i-role',dept:'i-dept',doj:'i-doj',loc:'i-loc',mgr:'i-mgr'};
+    const el = document.getElementById(map[f]);
+    if (el) el.addEventListener('input', () => response[f] = el.value);
+  });
+  ['c_q10','f_q15','g_q17','o_q19','o_q20','o_q21','o_q22'].forEach(f => {
+    const el = document.getElementById('i-'+f);
+    if (el) el.addEventListener('input', () => response[f] = el.value);
+  });
+}
+
+window.setNPS = function(n) {
+  response.o_nps = n;
+  document.querySelectorAll('.nps-btn').forEach(b => {
+    b.classList.remove('nps-d','nps-pas','nps-pr');
+    if (parseInt(b.dataset.n) === n) {
+      b.classList.add(n<=6?'nps-d':n<=8?'nps-pas':'nps-pr');
+    }
+  });
+};
+
+function clearValidationState() {
+  const box = document.getElementById('step-error');
+  if (box) { box.style.display = 'none'; box.textContent = ''; }
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+  document.querySelectorAll('.group-error').forEach(el => el.classList.remove('group-error'));
+}
+function getStepValidationErrors(step) {
+  const errs = [];
+  const blank = v => typeof v !== 'string' || !v.trim();
+  const unrated = arr => !Array.isArray(arr) || arr.some(v => !v || v < 1);
+  const emptyArr = arr => !Array.isArray(arr) || arr.length === 0;
+  if (step === 0) {
+    if (blank(response.name)) errs.push({id:'i-name'});
+    if (blank(response.empId)) errs.push({id:'i-empid'});
+    if (blank(response.role)) errs.push({id:'i-role'});
+    if (blank(response.dept)) errs.push({id:'i-dept'});
+    if (blank(response.doj)) errs.push({id:'i-doj'});
+    if (blank(response.loc)) errs.push({id:'i-loc'});
+    if (blank(response.mgr)) errs.push({id:'i-mgr'});
+    if (blank(response.src)) errs.push({id:'src-opts'});
+  }
+  if (step === 1) {
+    if (unrated(response.a_t1)) errs.push({id:'a_t1-0'});
+    if (blank(response.a_q1)) errs.push({id:'aq1-opts'});
+    if (blank(response.a_q2)) errs.push({id:'aq2-opts'});
+    if (unrated(response.a_t2)) errs.push({id:'a_t2-0'});
+  }
+  if (step === 2) {
+    if (unrated(response.b_t3)) errs.push({id:'b_t3-0'});
+    if (blank(response.b_q4)) errs.push({id:'bq4-opts'});
+    if (blank(response.b_q5)) errs.push({id:'bq5-opts'});
+    if (unrated(response.b_t4)) errs.push({id:'b_t4-0'});
+    if (blank(response.b_q6)) errs.push({id:'bq6-opts'});
+    if (unrated(response.b_t5)) errs.push({id:'b_t5-0'});
+    if (blank(response.b_q7)) errs.push({id:'bq7-opts'});
+  }
+  if (step === 3) {
+    if (unrated(response.c_t6)) errs.push({id:'c_t6-0'});
+    if (blank(response.c_q8)) errs.push({id:'cq8-opts'});
+    if (unrated(response.c_t7)) errs.push({id:'c_t7-0'});
+    if (blank(response.c_yn1)) errs.push({id:'c_yn1'});
+    if (blank(response.c_yn2)) errs.push({id:'c_yn2'});
+    if (blank(response.c_yn3)) errs.push({id:'c_yn3'});
+    if (blank(response.c_yn4)) errs.push({id:'c_yn4'});
+    if (blank(response.c_q9)) errs.push({id:'cq9-opts'});
+    if (blank(response.c_q10)) errs.push({id:'i-c_q10'});
+  }
+  if (step === 4) {
+    if (unrated(response.d_t8)) errs.push({id:'d_t8-0'});
+    if (blank(response.d_yn1)) errs.push({id:'d_yn1'});
+    if (blank(response.d_yn2)) errs.push({id:'d_yn2'});
+    if (blank(response.d_yn3)) errs.push({id:'d_yn3'});
+    if (blank(response.d_q11)) errs.push({id:'dq11-opts'});
+  }
+  if (step === 5) {
+    if (unrated(response.f_t9)) errs.push({id:'f_t9-0'});
+    if (unrated(response.f_t10)) errs.push({id:'f_t10-0'});
+    if (blank(response.f_q12)) errs.push({id:'fq12-opts'});
+    if (emptyArr(response.f_q13)) errs.push({id:'fq13-checks'});
+    if (emptyArr(response.f_q14)) errs.push({id:'fq14-checks'});
+    if (blank(response.f_q15)) errs.push({id:'i-f_q15'});
+    if (unrated(response.g_t11)) errs.push({id:'g_t11-0'});
+    if (blank(response.g_yn1)) errs.push({id:'g_yn1'});
+    if (blank(response.g_yn2)) errs.push({id:'g_yn2'});
+    if (blank(response.g_yn3)) errs.push({id:'g_yn3'});
+    if (emptyArr(response.g_q16)) errs.push({id:'gq16-checks'});
+    if (blank(response.g_q17)) errs.push({id:'i-g_q17'});
+    if (unrated(response.g_t12)) errs.push({id:'g_t12-0'});
+  }
+  if (step === 6) {
+    if (unrated(response.o_r)) errs.push({id:'o_r-0'});
+    if (response.o_nps < 0) errs.push({id:'nps-row'});
+    if (blank(response.o_q19)) errs.push({id:'i-o_q19'});
+    if (blank(response.o_q20)) errs.push({id:'i-o_q20'});
+    if (blank(response.o_q21)) errs.push({id:'i-o_q21'});
+    if (blank(response.o_q22)) errs.push({id:'i-o_q22'});
+  }
+  return errs;
+}
+function markValidationErrors(errors) {
+  clearValidationState();
+  if (!errors.length) return true;
+  const box = document.getElementById('step-error');
+  if (box) { box.textContent = 'Please complete all mandatory fields before continuing.'; box.style.display = 'block'; }
+  errors.forEach(err => {
+    const el = document.getElementById(err.id);
+    if (!el) return;
+    if (el.classList.contains('q-input') || el.classList.contains('q-textarea')) el.classList.add('field-error');
+    else el.classList.add('group-error');
+  });
+  const first = document.getElementById(errors[0].id);
+  if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
+  return false;
+}
+function validateStep(step) { return markValidationErrors(getStepValidationErrors(step)); }
+function nextStep() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep < TOTAL_STEPS - 1) { currentStep++; renderStep(); }
+}
+function prevStep() {
+  clearValidationState();
+  if (currentStep > 0) { currentStep--; renderStep(); }
+}
+async function submitSurvey() {
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+  
+  // Use URLSearchParams to ensure the script receives it via e.parameter
+  const formData = new URLSearchParams();
+  formData.append('data', JSON.stringify(response));
+
+  try {
+    await fetch(WEB_APP_URL, {
+      method: 'POST',
+      body: formData
+    });
+    
+    showScreen('s-thankyou');
+  } catch (error) {
+    console.error('Submission failed:', error);
+    alert('Submission failed. Please check your internet connection.');
+  }
+}
+
+// ═══════════ DASHBOARD ═══════════
+// Add this at the very top of your script, outside any functions
+let globalData = [];
+let globalAllData = []; // stores last fetched dashboard data for Excel export
+
+// async function renderDashboard() {
+//   //localStorage.removeItem('ur_responses_v2');
+//     activeCharts.forEach(c => c.destroy());
+//     activeCharts = [];
+    
+//     const body = document.getElementById('dash-body');
+//     body.innerHTML = '<div>Loading analytics...</div>';
+
+//     // 1. Declare 'all' here so it is accessible in both try and catch
+//     let all = []; 
+
+//    try {
+//     // const response = await fetch('https://docs.google.com/spreadsheets/d/1voNp_maJ833n1cmyqD_mmoDHNx6inPw_NUNpzqxMcIU/edit?pli=1&gid=1583373108#gid=1583373108');
+//     const response = await fetch('https://docs.google.com/spreadsheets/d/1voNp_maJ833n1cmyqD_mmoDHNx6inPw_NUNpzqxMcIU/export?format=csv&gid=1583373108');
+//     //const data = await response.json();
+//     const data = await response.text();
+//     console.log("Raw CSV Data:", data); // Check F12 Console!
+
+//     all = csvToJSON(data);
+//     console.log("Parsed Data:", all); // Check F12 Console!
+
+//     if (all.length === 0) throw new Error('CSV is empty or could not be parsed');
+//     body.innerHTML = ''; 
+// } catch (error) {
+//     console.error("Dashboard Error:", error);
+//     body.innerHTML = `<div class="no-data"><h3>Error loading data</h3><p>${error.message}</p></div>`;
+// } 
+// Normalises a field that may be:
+//   - already a JS array     → [4,3,3,4]
+//   - a JSON-style string    → "[4,3,3,4]"
+//   - a semicolon string     → "4;3;3;4"
+//   - a single number/string → "4"
+function parseField(val) {
+  if (Array.isArray(val)) return val.map(Number);
+  if (val === null || val === undefined || val === '') return [];
+  const s = String(val).trim();
+  if (s.startsWith('[')) {
+    try { return JSON.parse(s).map(Number); } catch(e) {}
+  }
+  if (s.includes(';')) return s.split(';').map(Number);
+  if (s.includes(',')) return s.split(',').map(Number);
+  const n = Number(s);
+  return isNaN(n) ? [] : [n];
+}
+
+async function renderDashboard() {
+  activeCharts.forEach(c => c.destroy());
+  activeCharts = [];
+
+  const body = document.getElementById('dash-body');
+  body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Loading analytics…</div>';
+
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+
+  let all = [];
+  try {
+    const res = await fetch(WEB_APP_URL);
+    const rawData = await res.json();
+    const headers = rawData[0];
+    all = rawData.slice(1).map(row => {
+      let obj = {};
+      headers.forEach((h, i) => obj[h.trim()] = row[i]);
+      // Normalise every array field so avgArr() gets real number arrays
+      const arrayFields = [
+        'a_t1','a_t2','b_t3','b_t4','b_t5',
+        'c_t6','c_t7','d_t8','f_t9','g_t11','g_t12','o_r'
+      ];
+      arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
+      // Normalise NPS to a number
+      obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
+      return obj;
+    });
+  } catch (err) {
+    console.error('Dashboard fetch error:', err);
+    // Fallback to localStorage
+    all = loadResponses();
+    if (!all.length) {
+      body.innerHTML = `<div class="no-data"><h3>No data available</h3><p>${err.message}</p></div>`;
+      return;
+    }
+  }
+
+  globalAllData = all; // save for Excel export
+  body.innerHTML = '';
+
+  // ── Compute KPIs ──
+  const n = all.length;
+  const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
+  const avgOverall = avg(all.map(r => avgArr(r.o_r)));
+  const avgConfidence = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
+  const promoters = all.filter(r => r.o_nps >= 9).length;
+  const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
+  const npsScore = Math.round(((promoters - detractors) / all.filter(r=>r.o_nps>=0).length) * 100) || 0;
+
+  // ── Section averages ──
+  const secAvgs = [
+    {l:'Recruiter Contact', v: avg(all.map(r=>avgArr(r.a_t1)))},
+    {l:'Job Description', v: avg(all.map(r=>avgArr(r.a_t2)))},
+    {l:'Interview Scheduling', v: avg(all.map(r=>avgArr(r.b_t3)))},
+    {l:'Panel Experience', v: avg(all.map(r=>avgArr(r.b_t4)))},
+    {l:'Offer Letter', v: avg(all.map(r=>avgArr(r.c_t6)))},
+    {l:'Pre-Joining Support', v: avg(all.map(r=>avgArr(r.c_t7)))},
+    {l:'Day 1 Reception', v: avg(all.map(r=>avgArr(r.d_t8)))},
+    {l:'Orientation Content', v: avg(all.map(r=>avgArr(r.f_t9)))},
+    {l:'Workspace Readiness', v: avg(all.map(r=>avgArr(r.g_t11)))},
+    {l:'Team Introduction', v: avg(all.map(r=>avgArr(r.g_t12)))},
+  ];
+
+  // ── Source distribution ──
+  const srcCount = countBy(all, r => r.src || 'Not specified');
+  // ── Interview rounds ──
+  const rndCount = countBy(all, r => r.b_q4 || 'Not specified');
+  // ── NPS groups ──
+  const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
+
+  // ── Arrival feeling ──
+  const feelCount = countBy(all, r => r.d_q11 || 'Not specified');
+
+  body.innerHTML = `
+    <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Key Metrics</div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score</div></div>
+        <div class="kpi"><div class="kpi-val">${avgOverall.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Overall Score</div></div>
+        <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Rating</div></div>
+        <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Confidence Score</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters/Math.max(all.filter(r=>r.o_nps>=0).length,1))*100)}%</div><div class="kpi-lbl">Promoter Rate</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Section-wise Performance</div>
+      <div class="chart-card">
+        <div class="chart-title">Average Ratings by Touchpoint</div>
+        <div class="chart-sub">Scale 1–5 across all ${n} responses</div>
+        <div class="chart-wrap" style="height:320px"><canvas id="ch-sections" role="img" aria-label="Bar chart of average ratings by touchpoint">Average touchpoint ratings</canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="margin-bottom:1.75rem">
+      <div class="chart-card">
+        <div class="chart-title">eNPS Distribution</div>
+        <div class="chart-sub">Promoters, Passives, Detractors</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-nps" role="img" aria-label="Donut chart showing NPS distribution">NPS distribution</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Source of Application <span class="req">*</span></div>
+        <div class="chart-sub">How candidates found Urbanrise</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-src" role="img" aria-label="Pie chart of application sources">Application sources</canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-grid" style="margin-bottom:1.75rem">
+      <div class="chart-card">
+        <div class="chart-title">Interview Rounds</div>
+        <div class="chart-sub">Number of rounds candidates went through</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="ch-rnd" role="img" aria-label="Bar chart of interview rounds">Interview rounds</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Day 1 Arrival Feeling</div>
+        <div class="chart-sub">How candidates felt on Day 1</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="ch-feel" role="img" aria-label="Bar chart of Day 1 feelings">Day 1 feelings</canvas></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Open Feedback</div>
+      <div class="fb-grid">
+        <div class="fb-card">
+          <div class="fb-card-head"><div class="fb-card-icon" style="background:#e8f5e9">👍</div><div class="fb-card-type">Best experiences</div></div>
+          ${all.filter(r=>r.o_q19).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q19)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
+        </div>
+        <div class="fb-card">
+          <div class="fb-card-head"><div class="fb-card-icon" style="background:#fff3e0">💡</div><div class="fb-card-type">Improvement areas</div></div>
+          ${all.filter(r=>r.o_q20).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q20)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
+        </div>
+        <div class="fb-card">
+          <div class="fb-card-head"><div class="fb-card-icon" style="background:#e3f2fd">✨</div><div class="fb-card-type">Suggestions</div></div>
+          ${all.filter(r=>r.o_q21).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q21)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:2rem">
+      <div class="dash-section-title">All Responses (${n})</div>
+      <div class="resp-table-wrap">
+        <table class="resp-table">
+          <thead><tr>
+            <th>#</th><th>Name</th><th>Role</th><th>Dept</th><th>DOJ</th>
+            <th>Recruiter</th><th>Interview</th><th>Day 1</th><th>Orientation</th><th>Overall</th><th>NPS</th>
+          </tr></thead>
+          <tbody>
+            ${all.slice().reverse().map((r,i)=>{
+              const rec=avgArr(r.a_t1); const intv=avgArr(r.b_t4); const d1=avgArr(r.d_t8); const ori=avgArr(r.f_t9); const ov=avgArr(r.o_r);
+              return `<tr>
+                <td style="color:var(--muted)">${n-i}</td>
+                <td><strong>${escHtml(r.name||'—')}</strong></td>
+                <td>${escHtml(r.role||'—')}</td>
+                <td>${escHtml(r.dept||'—')}</td>
+                <td>${r.doj||'—'}</td>
+                <td>${starSpan(rec)}</td>
+                <td>${starSpan(intv)}</td>
+                <td>${starSpan(d1)}</td>
+                <td>${starSpan(ori)}</td>
+                <td>${starSpan(ov)}</td>
+                <td>${r.o_nps>=0?`<span class="badge ${r.o_nps>=9?'g':r.o_nps>=7?'y':'r'}">${r.o_nps}</span>`:'—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // ── Draw charts ──
+  setTimeout(() => {
+    // Section bar
+    const secChart = new Chart(document.getElementById('ch-sections'), {
+      type:'bar',
+      data:{
+        labels: secAvgs.map(s=>s.l),
+        datasets:[{label:'Avg Rating',data:secAvgs.map(s=>s.v),backgroundColor:'rgba(152,58,12,0.15)',borderColor:'#c9581e',borderWidth:2,borderRadius:6}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}
+    });
+    activeCharts.push(secChart);
+
+    // NPS donut
+    const npsChart = new Chart(document.getElementById('ch-nps'), {
+      type:'doughnut',
+      data:{
+        labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
+        datasets:[{data:[npsGroups.Promoters,npsGroups.Passives,npsGroups.Detractors],backgroundColor:['#4ade80','#fb923c','#f87171'],borderWidth:0}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}}}}
+    });
+    activeCharts.push(npsChart);
+
+    // Source pie
+    const srcChart = new Chart(document.getElementById('ch-src'), {
+      type:'doughnut',
+      data:{
+        labels:Object.keys(srcCount),
+        datasets:[{data:Object.values(srcCount),backgroundColor:['#152d4a','#c9581e','#e07b3c','#4a90d9','#2d7a5f','#8b5cf6'],borderWidth:0}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}}}}
+    });
+    activeCharts.push(srcChart);
+
+    // Interview rounds bar
+    const rndChart = new Chart(document.getElementById('ch-rnd'), {
+      type:'bar',
+      data:{
+        labels:Object.keys(rndCount),
+        datasets:[{label:'Responses',data:Object.values(rndCount),backgroundColor:'#152d4a',borderRadius:6}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{stepSize:1}}}}
+    });
+    activeCharts.push(rndChart);
+
+    // Day 1 feeling
+    const feelChart = new Chart(document.getElementById('ch-feel'), {
+      type:'bar',
+      data:{
+        labels:Object.keys(feelCount),
+        datasets:[{label:'Responses',data:Object.values(feelCount),backgroundColor:['#4ade80','#86efac','#fb923c','#fca5a5','#f87171'],borderRadius:6}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:1}}}}
+    });
+    activeCharts.push(feelChart);
+  }, 100);
+}
+
+// ═══════════ EXCEL EXPORT ═══════════
+function exportToExcel() {
+  if (!globalAllData.length) {
+    alert('No data loaded yet. Please wait for the dashboard to finish loading.');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-export');
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
+
+  try {
+    const wb = XLSX.utils.book_new();
+
+    // ── Sheet 1: All Responses ──
+    const responseRows = globalAllData.map((r, i) => ({
+      '#':                  i + 1,
+      'Timestamp':          r.ts ? new Date(r.ts).toLocaleString('en-IN') : '—',
+      'Name':               r.name || '—',
+      'Employee ID':        r.empId || '—',
+      'Role':               r.role || '—',
+      'Department':         r.dept || '—',
+      'Date of Joining':    r.doj || '—',
+      'Location':           r.loc || '—',
+      'Manager':            r.mgr || '—',
+      'Source':             r.src || '—',
+      // Section averages
+      'Recruiter Contact (avg)':    +avgArr(r.a_t1).toFixed(2),
+      'Job Description (avg)':      +avgArr(r.a_t2).toFixed(2),
+      'Interview Scheduling (avg)': +avgArr(r.b_t3).toFixed(2),
+      'Panel Experience (avg)':     +avgArr(r.b_t4).toFixed(2),
+      'Offer Letter (avg)':         +avgArr(r.c_t6).toFixed(2),
+      'Pre-Joining Support (avg)':  +avgArr(r.c_t7).toFixed(2),
+      'Day 1 Reception (avg)':      +avgArr(r.d_t8).toFixed(2),
+      'Orientation Content (avg)':  +avgArr(r.f_t9).toFixed(2),
+      'Workspace Readiness (avg)':  +avgArr(r.g_t11).toFixed(2),
+      'Team Introduction (avg)':    +avgArr(r.g_t12).toFixed(2),
+      'Overall Rating (avg)':       +avgArr(r.o_r).toFixed(2),
+      'NPS Score':                  r.o_nps >= 0 ? r.o_nps : '—',
+      'NPS Category':               r.o_nps >= 9 ? 'Promoter' : r.o_nps >= 7 ? 'Passive' : r.o_nps >= 0 ? 'Detractor' : '—',
+      // Open feedback
+      'Best Experience':            r.o_q19 || '',
+      'Improvement Areas':          r.o_q20 || '',
+      'Suggestions':                r.o_q21 || '',
+    }));
+
+    const ws1 = XLSX.utils.json_to_sheet(responseRows);
+    // Column widths
+    ws1['!cols'] = [
+      {wch:4},{wch:20},{wch:18},{wch:14},{wch:20},{wch:16},{wch:14},{wch:14},{wch:18},{wch:16},
+      {wch:22},{wch:22},{wch:24},{wch:22},{wch:20},{wch:22},{wch:20},{wch:22},{wch:22},{wch:20},
+      {wch:20},{wch:10},{wch:12},{wch:30},{wch:30},{wch:30}
+    ];
+    XLSX.utils.book_append_sheet(wb, ws1, 'All Responses');
+
+    // ── Sheet 2: Summary KPIs ──
+    const n = globalAllData.length;
+    const npsValid = globalAllData.filter(r => r.o_nps >= 0);
+    const promoters = globalAllData.filter(r => r.o_nps >= 9).length;
+    const passives  = globalAllData.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
+    const detractors= globalAllData.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
+    const npsScore  = npsValid.length ? Math.round(((promoters - detractors) / npsValid.length) * 100) : 0;
+
+    const summaryRows = [
+      { 'Metric': 'Total Responses',       'Value': n },
+      { 'Metric': 'eNPS Score',            'Value': npsScore },
+      { 'Metric': 'Avg Overall Rating',    'Value': +avg(globalAllData.map(r => avgArr(r.o_r))).toFixed(2) },
+      { 'Metric': 'Avg NPS Rating',        'Value': +avg(globalAllData.map(r => r.o_nps).filter(v => v >= 0)).toFixed(2) },
+      { 'Metric': 'Promoters',             'Value': promoters },
+      { 'Metric': 'Passives',              'Value': passives },
+      { 'Metric': 'Detractors',            'Value': detractors },
+      { 'Metric': 'Promoter Rate (%)',     'Value': npsValid.length ? +(promoters / npsValid.length * 100).toFixed(1) : 0 },
+      {},
+      { 'Metric': 'Section',               'Value': 'Avg Rating' },
+      { 'Metric': 'Recruiter Contact',     'Value': +avg(globalAllData.map(r => avgArr(r.a_t1))).toFixed(2) },
+      { 'Metric': 'Job Description',       'Value': +avg(globalAllData.map(r => avgArr(r.a_t2))).toFixed(2) },
+      { 'Metric': 'Interview Scheduling',  'Value': +avg(globalAllData.map(r => avgArr(r.b_t3))).toFixed(2) },
+      { 'Metric': 'Panel Experience',      'Value': +avg(globalAllData.map(r => avgArr(r.b_t4))).toFixed(2) },
+      { 'Metric': 'Offer Letter',          'Value': +avg(globalAllData.map(r => avgArr(r.c_t6))).toFixed(2) },
+      { 'Metric': 'Pre-Joining Support',   'Value': +avg(globalAllData.map(r => avgArr(r.c_t7))).toFixed(2) },
+      { 'Metric': 'Day 1 Reception',       'Value': +avg(globalAllData.map(r => avgArr(r.d_t8))).toFixed(2) },
+      { 'Metric': 'Orientation Content',   'Value': +avg(globalAllData.map(r => avgArr(r.f_t9))).toFixed(2) },
+      { 'Metric': 'Workspace Readiness',   'Value': +avg(globalAllData.map(r => avgArr(r.g_t11))).toFixed(2) },
+      { 'Metric': 'Team Introduction',     'Value': +avg(globalAllData.map(r => avgArr(r.g_t12))).toFixed(2) },
+    ];
+    const ws2 = XLSX.utils.json_to_sheet(summaryRows);
+    ws2['!cols'] = [{wch:24},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+
+    // ── Download ──
+    const date = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `Urbanrise_Onboarding_Survey_${date}.xlsx`);
+
+  } catch(e) {
+    console.error('Export error:', e);
+    alert('Export failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Excel`;
+  }
+}
+
+// ═══════════ UTILS ═══════════
+function avg(arr) {
+  const v = arr.filter(x=>x>0);
+  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0;
+}
+function avgArr(arr) {
+  if (!arr||!arr.length) return 0;
+  return avg(arr);
+}
+function countBy(arr, fn) {
+  return arr.reduce((acc,r)=>{ const k=fn(r); acc[k]=(acc[k]||0)+1; return acc; },{});
+}
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(ts) {
+  try { return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+  catch { return '—'; }
+}
+function starSpan(v) {
+  if (!v) return '<span style="color:var(--muted)">—</span>';
+  const n = Math.round(v);
+  return `<span class="star-disp">${'★'.repeat(n)}${'☆'.repeat(5-n)}</span> <span style="font-size:11px;color:var(--muted)">${v.toFixed(1)}</span>`;
+}
+</script>
+</body>
+</html>
