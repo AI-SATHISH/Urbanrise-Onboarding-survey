@@ -416,7 +416,7 @@ function initResponse() {
   return {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     ts: new Date().toISOString(),
-    name:'', empId:'', role:'', dept:'', doj:'', loc:'', mgr:'', src:'',
+    name:'', empId:'', role:'', dept:'', doj:'', loc:'', mgr:'', src:'',recruiter:'',
     a_t1:[0,0,0,0], a_q1:'', a_q2:'',
     a_t2:[0,0,0],
     b_t3:[0,0,0,0], b_q4:'', b_q5:'',
@@ -496,8 +496,13 @@ const stepHTML = [
         <div class="q-block"><div class="q-label">Reporting Location / Site <span class="req">*</span></div>
           <input class="q-input" id="i-loc" placeholder="e.g. Chennai HQ" value="${response.loc}"></div>
       </div>
-      <div class="q-block"><div class="q-label">Reporting Manager's Name <span class="req">*</span></div>
-        <input class="q-input" id="i-mgr" placeholder="Manager's name" value="${response.mgr}"></div>
+      <div class="q-block"><div class="q-label">Reporting Manager Name <span class="req">*</span></div>
+        <input class="q-input" id="i-mgr" placeholder="Manager name" value="${response.mgr}"></div>
+        <div class="q-block" style="margin-top:12px"><div class="q-label">Recruiter Name <span class="req">*</span></div>
+        <select class="q-input" id="i-recruiter">
+          <option value="">— Select Recruiter —</option>
+          ${['Anurag Kumar - Singh','Kamal Nath - J','Sangeetha Devi - Velkumar','Archana - Gupta','Soma - Mohanty','Sanjay - V','Komal - Dev G D','Varun Kumar - Chakka','Hari Krishna - Maddugalla','Bharani - Rayala','Sejal Sanjay - Choudhary','Srujan - Devabhaktuni'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
+        </select>
     </div>
     <div class="section-card">
       <div class="section-label">Source of Application <span class="req">*</span></div>
@@ -868,6 +873,8 @@ function bindStep() {
     const el = document.getElementById(map[f]);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
+  const recEl = document.getElementById('i-recruiter');
+  if (recEl) recEl.addEventListener('change', () => response.recruiter = recEl.value);
   ['c_q10','f_q15','g_q17','o_q19','o_q20','o_q21','o_q22'].forEach(f => {
     const el = document.getElementById('i-'+f);
     if (el) el.addEventListener('input', () => response[f] = el.value);
@@ -903,6 +910,7 @@ function getStepValidationErrors(step) {
     if (blank(response.doj)) errs.push({id:'i-doj'});
     if (blank(response.loc)) errs.push({id:'i-loc'});
     if (blank(response.mgr)) errs.push({id:'i-mgr'});
+    if (blank(response.recruiter)) errs.push({id:'i-recruiter'});
     if (blank(response.src)) errs.push({id:'src-opts'});
   }
   if (step === 1) {
