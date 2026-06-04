@@ -1137,7 +1137,19 @@ async function renderDashboard() {
 
   // ── Arrival feeling ──
   const feelCount = countBy(all, r => r.d_q11 || 'Not specified');
-
+  // ── Recruiter-wise eNPS ──
+  const recruiterNames = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
+  const recruiterStats = recruiterNames.map(name => {
+    const rows = all.filter(r => (r.recruiter || 'Not Assigned') === name);
+    const valid = rows.filter(r => r.o_nps >= 0);
+    const prom  = valid.filter(r => r.o_nps >= 9).length;
+    const pass  = valid.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
+    const det   = valid.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
+    const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const avgRec = avg(rows.map(r => avgArr(r.a_t1)));
+    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgRec, avgOv };
+  });
   body.innerHTML = `
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Key Metrics</div>
@@ -1186,6 +1198,42 @@ async function renderDashboard() {
       </div>
     </div>
 
+      <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Recruiter-wise eNPS Performance</div>
+      <div class="resp-table-wrap">
+        <table class="resp-table">
+          <thead><tr>
+            <th>Recruiter</th>
+            <th>Responses</th>
+            <th>Promoters</th>
+            <th>Passives</th>
+            <th>Detractors</th>
+            <th>eNPS Score</th>
+            <th>Avg Recruiter Rating</th>
+            <th>Avg Overall Rating</th>
+          </tr></thead>
+          <tbody>
+            ${recruiterStats.map(s => {
+              const enpsColor = s.enps === null ? 'var(--muted)' : s.enps >= 50 ? 'var(--green)' : s.enps >= 0 ? '#d97706' : '#dc2626';
+              const enpsDisplay = s.enps === null ? '—' : s.enps;
+              const promPct = s.valid ? Math.round((s.prom/s.valid)*100) : 0;
+              const detPct  = s.valid ? Math.round((s.det/s.valid)*100) : 0;
+              return `<tr>
+                <td><strong>${escHtml(s.name)}</strong></td>
+                <td>${s.total}</td>
+                <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${promPct}%)</span></td>
+                <td><span class="badge y">${s.pass}</span></td>
+                <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${detPct}%)</span></td>
+                <td><strong style="font-size:18px;color:${enpsColor}">${enpsDisplay}</strong></td>
+                <td>${starSpan(s.avgRec)}</td>
+                <td>${starSpan(s.avgOv)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Open Feedback</div>
       <div class="fb-grid">
@@ -1204,29 +1252,72 @@ async function renderDashboard() {
       </div>
     </div>
 
-    <div style="margin-bottom:2rem">
+     <div style="margin-bottom:2rem">
       <div class="dash-section-title">All Responses (${n})</div>
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>#</th><th>Name</th><th>Role</th><th>Dept</th><th>DOJ</th>
-            <th>Recruiter</th><th>Interview</th><th>Day 1</th><th>Orientation</th><th>Overall</th><th>NPS</th>
+            <th>#</th>
+            <th>Timestamp</th>
+            <th>Name</th>
+            <th>Employee ID</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Date of Joining</th>
+            <th>Location</th>
+            <th>Manager</th>
+            <th>Recruiter</th>
+            <th>Source</th>
+            <th>Recruiter Contact (avg)</th>
+            <th>Job Description (avg)</th>
+            <th>Interview Scheduling (avg)</th>
+            <th>Panel Experience (avg)</th>
+            <th>Offer Letter (avg)</th>
+            <th>Pre-Joining Support (avg)</th>
+            <th>Day 1 Reception (avg)</th>
+            <th>Orientation Content (avg)</th>
+            <th>Workspace Readiness (avg)</th>
+            <th>Team Introduction (avg)</th>
+            <th>Overall Rating (avg)</th>
+            <th>NPS Score</th>
+            <th>NPS Category</th>
+            <th>Best Experience</th>
+            <th>Improvement Areas</th>
+            <th>Suggestions</th>
           </tr></thead>
           <tbody>
             ${all.slice().reverse().map((r,i)=>{
-              const rec=avgArr(r.a_t1); const intv=avgArr(r.b_t4); const d1=avgArr(r.d_t8); const ori=avgArr(r.f_t9); const ov=avgArr(r.o_r);
+              const npsCat = r.o_nps>=9?'Promoter':r.o_nps>=7?'Passive':r.o_nps>=0?'Detractor':'—';
+              const npsBadge = r.o_nps>=0?`<span class="badge ${r.o_nps>=9?'g':r.o_nps>=7?'y':'r'}">${r.o_nps}</span>`:'—';
+              const npsCatBadge = r.o_nps>=9?`<span class="badge g">Promoter</span>`:r.o_nps>=7?`<span class="badge y">Passive</span>`:r.o_nps>=0?`<span class="badge r">Detractor</span>`:'—';
               return `<tr>
                 <td style="color:var(--muted)">${n-i}</td>
+                <td style="color:var(--muted);font-size:12px">${fmtDate(r.ts)}</td>
                 <td><strong>${escHtml(r.name||'—')}</strong></td>
+                <td>${escHtml(r.empId||'—')}</td>
                 <td>${escHtml(r.role||'—')}</td>
                 <td>${escHtml(r.dept||'—')}</td>
                 <td>${r.doj||'—'}</td>
-                <td>${starSpan(rec)}</td>
-                <td>${starSpan(intv)}</td>
-                <td>${starSpan(d1)}</td>
-                <td>${starSpan(ori)}</td>
-                <td>${starSpan(ov)}</td>
-                <td>${r.o_nps>=0?`<span class="badge ${r.o_nps>=9?'g':r.o_nps>=7?'y':'r'}">${r.o_nps}</span>`:'—'}</td>
+                <td>${escHtml(r.loc||'—')}</td>
+                <td>${escHtml(r.mgr||'—')}</td>
+                <td>${escHtml(r.recruiter||'—')}</td>
+                <td>${escHtml(r.src||'—')}</td>
+                <td>${starSpan(avgArr(r.a_t1))}</td>
+                <td>${starSpan(avgArr(r.a_t2))}</td>
+                <td>${starSpan(avgArr(r.b_t3))}</td>
+                <td>${starSpan(avgArr(r.b_t4))}</td>
+                <td>${starSpan(avgArr(r.c_t6))}</td>
+                <td>${starSpan(avgArr(r.c_t7))}</td>
+                <td>${starSpan(avgArr(r.d_t8))}</td>
+                <td>${starSpan(avgArr(r.f_t9))}</td>
+                <td>${starSpan(avgArr(r.g_t11))}</td>
+                <td>${starSpan(avgArr(r.g_t12))}</td>
+                <td>${starSpan(avgArr(r.o_r))}</td>
+                <td>${npsBadge}</td>
+                <td>${npsCatBadge}</td>
+                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q19||'—')}</td>
+                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q20||'—')}</td>
+                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q21||'—')}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1234,7 +1325,6 @@ async function renderDashboard() {
       </div>
     </div>
   `;
-
   // ── Draw charts ──
   setTimeout(() => {
     // Section bar
@@ -1312,14 +1402,15 @@ function exportToExcel() {
     const responseRows = globalAllData.map((r, i) => ({
       '#':                  i + 1,
       'Timestamp':          r.ts ? new Date(r.ts).toLocaleString('en-IN') : '—',
-      'Name':               r.name || '—',
       'Employee ID':        r.empId || '—',
+      'Name':               r.name || '—',
       'Role':               r.role || '—',
       'Department':         r.dept || '—',
       'Date of Joining':    r.doj || '—',
       'Location':           r.loc || '—',
       'Manager':            r.mgr || '—',
       'Source':             r.src || '—',
+      'Recruiter':          r.recruiter || '—',
       // Section averages
       'Recruiter Contact (avg)':    +avgArr(r.a_t1).toFixed(2),
       'Job Description (avg)':      +avgArr(r.a_t2).toFixed(2),
