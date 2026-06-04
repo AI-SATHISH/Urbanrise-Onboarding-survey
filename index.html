@@ -1025,6 +1025,7 @@ let globalData = [];
 let globalAllData = []; // stores last fetched dashboard data for Excel export
 window._activeRecruiterFilter = 'all';
 window._allRecruiters = [];
+
 // async function renderDashboard() {
 //   //localStorage.removeItem('ur_responses_v2');
 //     activeCharts.forEach(c => c.destroy());
@@ -1087,28 +1088,28 @@ async function renderDashboard() {
     all = rawData.slice(1).map(row => {
       let obj = {};
       headers.forEach((h, i) => obj[h.trim()] = row[i]);
-      // Normalise every array field so avgArr() gets real number arrays
       const arrayFields = [
         'a_t1','a_t2','b_t3','b_t4','b_t5',
         'c_t6','c_t7','d_t8','f_t9','g_t11','g_t12','o_r'
       ];
       arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
-      // Normalise NPS to a number
       obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
+      // ── Clean " - " from name fields ──
+      ['name','mgr','recruiter'].forEach(f => {
+        if (obj[f]) obj[f] = obj[f].replace(/\s*-\s*/g, ' ').trim();
+      });
       return obj;
     });
   } catch (err) {
     console.error('Dashboard fetch error:', err);
-    // Fallback to localStorage
     all = loadResponses();
     if (!all.length) {
       body.innerHTML = `<div class="no-data"><h3>No data available</h3><p>${err.message}</p></div>`;
       return;
     }
   }
-
-  globalAllData = all; // save for Excel export
-  body.innerHTML = '';
+  
+  globalAllData = all;
 
   // ── Populate recruiter filter dropdown ──
   // store unique recruiters for repopulating dropdown after each render
@@ -1125,7 +1126,6 @@ function applyRecruiterFilter() {
   activeCharts = [];
   renderDashboardData(filtered);
 }
-
 function renderDashboardData(all) {
   const body = document.getElementById('dash-body');
 
