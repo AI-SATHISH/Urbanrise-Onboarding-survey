@@ -1297,7 +1297,7 @@ async function renderDashboard() {
                 <td>${escHtml(r.empId||'—')}</td>
                 <td>${escHtml(r.role||'—')}</td>
                 <td>${escHtml(r.dept||'—')}</td>
-                <td>${r.doj||'—'}</td>
+                <td>${fmtDOJ(r.doj)}</td>
                 <td>${escHtml(r.loc||'—')}</td>
                 <td>${escHtml(r.mgr||'—')}</td>
                 <td>${escHtml(r.recruiter||'—')}</td>
@@ -1406,7 +1406,7 @@ function exportToExcel() {
       'Name':               r.name || '—',
       'Role':               r.role || '—',
       'Department':         r.dept || '—',
-      'Date of Joining':    r.doj || '—',
+      'Date of Joining':    fmtDOJ(r.doj),
       'Location':           r.loc || '—',
       'Manager':            r.mgr || '—',
       'Source':             r.src || '—',
@@ -1505,6 +1505,17 @@ function escHtml(s) {
 function fmtDate(ts) {
   try { return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
   catch { return '—'; }
+}
+function fmtDOJ(val) {
+  if (!val) return "—";
+  try {
+    const d = new Date(val);
+    if (isNaN(d)) return val;
+    const dd = String(d.getUTCDate()).padStart(2,"0");
+    const mm = String(d.getUTCMonth()+1).padStart(2,"0");
+    const yyyy = d.getUTCFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  } catch { return val; }
 }
 function starSpan(v) {
   if (!v) return '<span style="color:var(--muted)">—</span>';
