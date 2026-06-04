@@ -1622,7 +1622,7 @@ function countBy(arr, fn) {
   return arr.reduce((acc,r)=>{ const k=fn(r); acc[k]=(acc[k]||0)+1; return acc; },{});
 }
 function escHtml(s) {
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function fmtDate(ts) {
   try { return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
