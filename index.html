@@ -1431,30 +1431,32 @@ async function renderDashboard() {
     activeCharts.push(rndChart);
 
     // Day 1 feeling
-const feelChart = new Chart(document.getElementById('ch-feel'), {
-  type:'bar',
-  data:{
-    labels:Object.keys(feelCount),
-    datasets:[{label:'Responses',data:Object.values(feelCount),backgroundColor:['#4ade80','#86efac','#fb923c','#fca5a5','#f87171'],borderRadius:6}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,indexAxis:'y',
-    clip:false,
-    layout:{padding:{right:32}},
-    plugins:{
-      legend:{display:false},
-      datalabels:{
-        anchor:'end',align:'end',
-        color:'#1a1a1a',
-        font:{weight:'600',size:12},
-        formatter: v => v > 0 ? v : ''
-      }
-    },
-    scales:{x:{ticks:{stepSize:1}}}
-  },
-  plugins:[ChartDataLabels]
-});
-   
+    const feelChart = new Chart(document.getElementById('ch-feel'), {
+      type:'bar',
+      data:{
+        labels:Object.keys(feelCount),
+        datasets:[{label:'Responses',data:Object.values(feelCount),backgroundColor:['#4ade80','#86efac','#fb923c','#fca5a5','#f87171'],borderRadius:6}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        clip:false,
+        layout:{padding:{right:32}},
+        plugins:{
+          legend:{display:false},
+          datalabels:{
+            anchor:'end',align:'end',
+            color:'#1a1a1a',
+            font:{weight:'600',size:12},
+            formatter: v => v > 0 ? v : ''
+          }
+        },
+        scales:{x:{ticks:{stepSize:1}}}
+      },
+      plugins:[ChartDataLabels]
+    });
+    activeCharts.push(feelChart);
+  }, 100);
+}   
 // ═══════════ EXCEL EXPORT ═══════════
 function exportToExcel() {
   if (!globalAllData.length) {
