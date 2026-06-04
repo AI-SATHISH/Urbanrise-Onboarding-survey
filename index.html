@@ -1335,7 +1335,7 @@ async function renderDashboard() {
         labels: secAvgs.map(s=>s.l),
         datasets:[{label:'Avg Rating',data:secAvgs.map(s=>s.v),backgroundColor:'rgba(152,58,12,0.15)',borderColor:'#c9581e',borderWidth:2,borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}
+      options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}}},plugins:{legend:{display:true}}}
     });
     activeCharts.push(secChart);
 
@@ -1368,7 +1368,7 @@ async function renderDashboard() {
         labels:Object.keys(rndCount),
         datasets:[{label:'Responses',data:Object.values(rndCount),backgroundColor:'#152d4a',borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{stepSize:1}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{ticks:{stepSize:1}}}}
     });
     activeCharts.push(rndChart);
 
@@ -1379,7 +1379,7 @@ async function renderDashboard() {
         labels:Object.keys(feelCount),
         datasets:[{label:'Responses',data:Object.values(feelCount),backgroundColor:['#4ade80','#86efac','#fb923c','#fca5a5','#f87171'],borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:1}}}}
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:true}},scales:{x:{ticks:{stepSize:1}}}}
     });
     activeCharts.push(feelChart);
   }, 100);
