@@ -454,7 +454,11 @@ const steps = [
   {badge:'Part F & G', title:'Orientation & Workspace Readiness', desc:'Rate the orientation program quality and readiness of your workspace and tools.'},
   {badge:'Overall', title:'Overall Satisfaction & Feedback', desc:'Share your overall ratings and open thoughts — your words directly shape how we improve.'},
 ];
-
+// Location options list
+const LOCATION_OPTIONS = [
+  'Chennai','Hyderabad','Bangalore','GCC'
+];
+  
 function renderStep() {
   const s = steps[currentStep];
   document.getElementById('step-label').textContent = `Step ${currentStep+1} of ${TOTAL_STEPS}`;
@@ -497,8 +501,11 @@ const stepHTML = [
       <div class="g2" style="margin-bottom:12px">
         <div class="q-block"><div class="q-label">Date of Joining <span class="req">*</span></div>
           <input class="q-input" type="date" id="i-doj" value="${response.doj}"></div>
-        <div class="q-block"><div class="q-label">Reporting Location / Site <span class="req">*</span></div>
-          <input class="q-input" id="i-loc" placeholder="e.g. Chennai Office" value="${response.loc}"></div>
+         <div class="q-block"><div class="q-label">Location <span class="req">*</span></div>
+          <select class="q-input" id="i-loc">
+            <option value="">— Select Location —</option>
+            ${LOCATION_OPTIONS.map(l=>`<option value="${l}"${response.loc===l?' selected':''}>${l}</option>`).join('')}
+          </select></div>
       </div>
       <div class="q-block"><div class="q-label">Reporting Manager Name <span class="req">*</span></div>
         <input class="q-input" id="i-mgr" placeholder="Manager name" value="${response.mgr}"></div>
@@ -1111,34 +1118,42 @@ async function renderDashboard() {
   
   globalAllData = all;
 
-  // ── Populate recruiter filter dropdown ──
-  // store unique recruiters for repopulating dropdown after each render
+  // Populate recruiter & location filter options
   window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
+  window._allLocations  = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
 
   renderDashboardData(all);
 }
 
-function applyRecruiterFilter() {
-  const val = document.getElementById('recruiter-filter').value;
-  window._activeRecruiterFilter = val;
-  const filtered = val === 'all' ? globalAllData : globalAllData.filter(r => (r.recruiter || 'Not Assigned') === val);
+// ── Combined filter function ──
+function applyRecruiterFilter() { applyFilters(); }
+function applyFilters() {
+  const rec = document.getElementById('recruiter-filter') ? document.getElementById('recruiter-filter').value : 'all';
+  const loc = document.getElementById('location-filter')  ? document.getElementById('location-filter').value  : 'all';
+  window._activeRecruiterFilter = rec;
+  window._activeLocFilter = loc;
+  let filtered = globalAllData;
+  if (rec !== 'all') filtered = filtered.filter(r => (r.recruiter || 'Not Assigned') === rec);
+  if (loc !== 'all') filtered = filtered.filter(r => (r.loc || 'Not Specified') === loc);
   activeCharts.forEach(c => c.destroy());
   activeCharts = [];
   renderDashboardData(filtered);
 }
+
 function renderDashboardData(all) {
   const body = document.getElementById('dash-body');
 
-  // ── Compute KPIs ──
+  // KPIs
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
   const avgOverall = avg(all.map(r => avgArr(r.o_r)));
   const avgConfidence = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
   const promoters = all.filter(r => r.o_nps >= 9).length;
   const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
-  const npsScore = Math.round(((promoters - detractors) / all.filter(r=>r.o_nps>=0).length) * 100) || 0;
+  const npsValidCount = all.filter(r=>r.o_nps>=0).length;
+  const npsScore = Math.round(((promoters - detractors) / Math.max(npsValidCount,1)) * 100);
 
-  // ── Section averages ──
+  // Section averages
   const secAvgs = [
     {l:'Recruiter Contact', v: avg(all.map(r=>avgArr(r.a_t1)))},
     {l:'Job Description', v: avg(all.map(r=>avgArr(r.a_t2)))},
@@ -1152,16 +1167,11 @@ function renderDashboardData(all) {
     {l:'Team Introduction', v: avg(all.map(r=>avgArr(r.g_t12)))},
   ];
 
-  // ── Source distribution ──
   const srcCount = countBy(all, r => r.src || 'Not specified');
-  // ── Interview rounds ──
   const rndCount = countBy(all, r => r.b_q4 || 'Not specified');
-  // ── NPS groups ──
   const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
-
-  // ── Arrival feeling ──
   const feelCount = countBy(all, r => r.d_q11 || 'Not specified');
-  // ── Recruiter-wise eNPS ──
+
   const recruiterNames = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   const recruiterStats = recruiterNames.map(name => {
     const rows = all.filter(r => (r.recruiter || 'Not Assigned') === name);
@@ -1176,20 +1186,28 @@ function renderDashboardData(all) {
   });
 
   if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
+  if (window._activeLocFilter === undefined) window._activeLocFilter = 'all';
   if (window._allRecruiters === undefined) window._allRecruiters = [];
+  if (window._allLocations === undefined) window._allLocations = [];
   const activeFilter = window._activeRecruiterFilter;
-  const allRecruiters = window._allRecruiters;
-  
-    body.innerHTML = `
+  const activeLocFilter = window._activeLocFilter;
+
+  const DROPDOWN_STYLE = `background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;box-shadow:var(--shadow);min-width:160px`;
+
+  body.innerHTML = `
     <div style="margin-bottom:1.75rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <div class="dash-section-title" style="margin-bottom:0;flex:1">Key Metrics</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head)">Recruiter</span>
-          <select id="recruiter-filter" onchange="applyRecruiterFilter()" style="background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;min-width:180px;cursor:pointer;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+        <div class="dash-section-title" style="margin-bottom:0;flex:1;min-width:100px">Key Metrics</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em">Location</span>
+          <select id="location-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE}">
+            <option value="all">All Locations</option>
+          </select>
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:4px">Recruiter</span>
+          <select id="recruiter-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:180px">
             <option value="all">All Recruiters</option>
           </select>
-          ${activeFilter !== 'all' ? `<button onclick="document.getElementById('recruiter-filter').value='all';applyRecruiterFilter()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
+          ${(activeFilter !== 'all' || activeLocFilter !== 'all') ? `<button onclick="document.getElementById('recruiter-filter').value='all';document.getElementById('location-filter').value='all';applyFilters()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
         </div>
       </div>
       <div class="kpi-grid">
@@ -1198,7 +1216,7 @@ function renderDashboardData(all) {
         <div class="kpi"><div class="kpi-val">${avgOverall.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Overall Score</div></div>
         <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Rating</div></div>
         <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Confidence Score</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters/Math.max(all.filter(r=>r.o_nps>=0).length,1))*100)}%</div><div class="kpi-lbl">Promoter Rate</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters/Math.max(npsValidCount,1))*100)}%</div><div class="kpi-lbl">Promoter Rate</div></div>
       </div>
     </div>
 
@@ -1207,7 +1225,7 @@ function renderDashboardData(all) {
       <div class="chart-card">
         <div class="chart-title">Average Ratings by Touchpoint</div>
         <div class="chart-sub">Scale 1–5 across all ${n} responses</div>
-        <div class="chart-wrap" style="height:320px"><canvas id="ch-sections" role="img" aria-label="Bar chart of average ratings by touchpoint">Average touchpoint ratings</canvas></div>
+        <div class="chart-wrap" style="height:320px"><canvas id="ch-sections"></canvas></div>
       </div>
     </div>
 
@@ -1215,12 +1233,12 @@ function renderDashboardData(all) {
       <div class="chart-card">
         <div class="chart-title">eNPS Distribution</div>
         <div class="chart-sub">Promoters, Passives, Detractors</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="ch-nps" role="img" aria-label="Donut chart showing NPS distribution">NPS distribution</canvas></div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-nps"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Source of Application <span class="req">*</span></div>
+        <div class="chart-title">Source of Application</div>
         <div class="chart-sub">How candidates found Urbanrise</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="ch-src" role="img" aria-label="Pie chart of application sources">Application sources</canvas></div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-src"></canvas></div>
       </div>
     </div>
 
@@ -1228,12 +1246,12 @@ function renderDashboardData(all) {
       <div class="chart-card">
         <div class="chart-title">Interview Rounds</div>
         <div class="chart-sub">Number of rounds candidates went through</div>
-        <div class="chart-wrap" style="height:200px"><canvas id="ch-rnd" role="img" aria-label="Bar chart of interview rounds">Interview rounds</canvas></div>
+        <div class="chart-wrap" style="height:200px"><canvas id="ch-rnd"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Day 1 Arrival Feeling</div>
         <div class="chart-sub">How candidates felt on Day 1</div>
-        <div class="chart-wrap" style="height:200px"><canvas id="ch-feel" role="img" aria-label="Bar chart of Day 1 feelings">Day 1 feelings</canvas></div>
+        <div class="chart-wrap" style="height:200px"><canvas id="ch-feel"></canvas></div>
       </div>
     </div>
 
@@ -1242,19 +1260,12 @@ function renderDashboardData(all) {
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>Recruiter</th>
-            <th>Responses</th>
-            <th>Promoters</th>
-            <th>Passives</th>
-            <th>Detractors</th>
-            <th>eNPS Score</th>
-            <th>Avg Recruiter Rating</th>
-            <th>Avg Overall Rating</th>
+            <th>Recruiter</th><th>Responses</th><th>Promoters</th><th>Passives</th>
+            <th>Detractors</th><th>eNPS Score</th><th>Avg Recruiter Rating</th><th>Avg Overall Rating</th>
           </tr></thead>
           <tbody>
             ${recruiterStats.map(s => {
               const enpsColor = s.enps === null ? 'var(--muted)' : s.enps >= 50 ? 'var(--green)' : s.enps >= 0 ? '#d97706' : '#dc2626';
-              const enpsDisplay = s.enps === null ? '—' : s.enps;
               const promPct = s.valid ? Math.round((s.prom/s.valid)*100) : 0;
               const detPct  = s.valid ? Math.round((s.det/s.valid)*100) : 0;
               return `<tr>
@@ -1263,7 +1274,7 @@ function renderDashboardData(all) {
                 <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${promPct}%)</span></td>
                 <td><span class="badge y">${s.pass}</span></td>
                 <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${detPct}%)</span></td>
-                <td><strong style="font-size:18px;color:${enpsColor}">${enpsDisplay}</strong></td>
+                <td><strong style="font-size:18px;color:${enpsColor}">${s.enps === null ? '—' : s.enps}</strong></td>
                 <td>${starSpan(s.avgRec)}</td>
                 <td>${starSpan(s.avgOv)}</td>
               </tr>`;
@@ -1290,43 +1301,25 @@ function renderDashboardData(all) {
         </div>
       </div>
     </div>
-    
-     <div style="margin-bottom:2rem">
+
+    <div style="margin-bottom:2rem">
       <div class="dash-section-title">All Responses (${n})</div>
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>#</th>
-            <th>Timestamp</th>
-            <th>Name</th>
-            <th>Employee ID</th>
-            <th>Role</th>
-            <th>Department</th>
-            <th>Date of Joining</th>
-            <th>Location</th>
-            <th>Manager</th>
-            <th>Recruiter</th>
-            <th>Source</th>
-            <th>Recruiter Contact (avg)</th>
-            <th>Job Description (avg)</th>
-            <th>Interview Scheduling (avg)</th>
-            <th>Panel Experience (avg)</th>
-            <th>Offer Briefing & Closer</th>
-            <th>Pre-Joining Support (avg)</th>
-            <th>Day 1 Reception (avg)</th>
-            <th>Orientation Content (avg)</th>
-            <th>Workspace Readiness (avg)</th>
-            <th>Team Introduction (avg)</th>
-            <th>Overall Rating (avg)</th>
-            <th>NPS Score</th>
-            <th>NPS Category</th>
-            <th>Best Experience</th>
-            <th>Improvement Areas</th>
-            <th>Suggestions</th>
+            <th>#</th><th>Timestamp</th><th>Name</th><th>Employee ID</th><th>Role</th>
+            <th>Department</th><th>Date of Joining</th><th>Location</th><th>Manager</th>
+            <th>Recruiter</th><th>Source</th>
+            <th>Recruiter Contact (avg)</th><th>Job Description (avg)</th>
+            <th>Interview Scheduling (avg)</th><th>Panel Experience (avg)</th>
+            <th>Offer Briefing & Closer</th><th>Pre-Joining Support (avg)</th>
+            <th>Day 1 Reception (avg)</th><th>Orientation Content (avg)</th>
+            <th>Workspace Readiness (avg)</th><th>Team Introduction (avg)</th>
+            <th>Overall Rating (avg)</th><th>NPS Score</th><th>NPS Category</th>
+            <th>Best Experience</th><th>Improvement Areas</th><th>Suggestions</th>
           </tr></thead>
           <tbody>
             ${all.slice().reverse().map((r,i)=>{
-              const npsCat = r.o_nps>=9?'Promoter':r.o_nps>=7?'Passive':r.o_nps>=0?'Detractor':'—';
               const npsBadge = r.o_nps>=0?`<span class="badge ${r.o_nps>=9?'g':r.o_nps>=7?'y':'r'}">${r.o_nps}</span>`:'—';
               const npsCatBadge = r.o_nps>=9?`<span class="badge g">Promoter</span>`:r.o_nps>=7?`<span class="badge y">Passive</span>`:r.o_nps>=0?`<span class="badge r">Detractor</span>`:'—';
               return `<tr>
@@ -1364,16 +1357,25 @@ function renderDashboardData(all) {
       </div>
     </div>
   `;
-  // ── Populate recruiter dropdown ──
+
+  // Populate dropdowns after render
   setTimeout(() => {
-    const filterEl = document.getElementById('recruiter-filter');
-    if (filterEl && window._allRecruiters && window._allRecruiters.length) {
-      filterEl.innerHTML = `<option value="all">All Recruiters</option>` +
+    const recEl = document.getElementById('recruiter-filter');
+    if (recEl && window._allRecruiters && window._allRecruiters.length) {
+      recEl.innerHTML = `<option value="all">All Recruiters</option>` +
         window._allRecruiters.map(r =>
           `<option value="${r}"${activeFilter === r ? ' selected' : ''}>${r}</option>`
         ).join('');
     }
+    const locEl = document.getElementById('location-filter');
+    if (locEl && window._allLocations && window._allLocations.length) {
+      locEl.innerHTML = `<option value="all">All Locations</option>` +
+        window._allLocations.map(l =>
+          `<option value="${l}"${activeLocFilter === l ? ' selected' : ''}>${l}</option>`
+        ).join('');
+    }
   }, 50);
+
   // ── Draw charts ──
  setTimeout(() => {
     // Section bar
