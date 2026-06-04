@@ -774,9 +774,12 @@ const stepHTML = [
       <div class="q-label"><strong>Q18.</strong> On a scale of 0–10, how likely are you to recommend Urbanrise as a great place to work? <span class="req">*</span></div>
       <div class="nps-row" id="nps-row">
         ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
-          let cls = n<=6?'nps-d':n<=8?'nps-pas':'nps-pr';
+          let cls = n<=6?'sel-det':n<=8?'sel-pas':'sel-pro';
           let sel = response.o_nps===n?' '+cls:'';
-          return `<button class="nps-btn${sel}" data-n="${n}" onclick="setNPS(${n})">${n}</button>`;
+          return `<button type="button"
+                class="nps-btn${sel}"
+                data-n="${n}"
+                onclick="setNPS(${n})">${n}</button>`;
         }).join('')}
       </div>
       <div class="nps-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
@@ -898,13 +901,21 @@ function bindStep() {
 }
 
 window.setNPS = function(n) {
-  response.o_nps = n;
-  document.querySelectorAll('.nps-btn').forEach(b => {
-    b.classList.remove('nps-d','nps-pas','nps-pr');
-    if (parseInt(b.dataset.n) === n) {
-      b.classList.add(n<=6?'nps-d':n<=8?'nps-pas':'nps-pr');
-    }
-  });
+    response.o_nps = n;
+
+    document.querySelectorAll('.nps-btn').forEach(b => {
+        b.classList.remove('sel-det', 'sel-pas', 'sel-pro');
+
+        if (parseInt(b.dataset.n) === n) {
+            if (n <= 6) {
+                b.classList.add('sel-det');
+            } else if (n <= 8) {
+                b.classList.add('sel-pas');
+            } else {
+                b.classList.add('sel-pro');
+            }
+        }
+    });
 };
 
 function clearValidationState() {
