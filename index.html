@@ -1182,15 +1182,16 @@ function renderDashboardData(all) {
   
   body.innerHTML = `
     <div style="margin-bottom:1.75rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
         <div class="dash-section-title" style="margin-bottom:0;flex:1">Key Metrics</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:12px;color:var(--muted);font-family:var(--font-head)">Recruiter</span>
-          <select id="recruiter-filter" onchange="applyRecruiterFilter()" style="background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;min-width:180px;cursor:pointer;box-shadow:var(--shadow)">
+          <select id="recruiter-filter" onchange="applyRecruiterFilter()" style="...">
             <option value="all">All Recruiters</option>
           </select>
-          ${activeFilter !== 'all' ? `<button onclick="document.getElementById('recruiter-filter').value='all';applyRecruiterFilter()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
+          ${activeFilter !== 'all' ? `<button onclick="...">✕ Clear</button>` : ''}
         </div>
+      </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
         <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score</div></div>
