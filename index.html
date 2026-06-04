@@ -1335,7 +1335,12 @@ async function renderDashboard() {
         labels: secAvgs.map(s=>s.l),
         datasets:[{label:'Avg Rating',data:secAvgs.map(s=>s.v),backgroundColor:'rgba(152,58,12,0.15)',borderColor:'#c9581e',borderWidth:2,borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}}},plugins:{legend:{display:true}}}
+      options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5,ticks:{stepSize:1}}},plugins:{legend:{display:true},datalabels:{
+    anchor:'end', align:'end',
+    color:'#c9581e',
+    font:{weight:'600', size:12},
+    formatter: v => v > 0 ? v.toFixed(2) : ''
+  }}}
     });
     activeCharts.push(secChart);
 
@@ -1346,7 +1351,12 @@ async function renderDashboard() {
         labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
         datasets:[{data:[npsGroups.Promoters,npsGroups.Passives,npsGroups.Detractors],backgroundColor:['#4ade80','#fb923c','#f87171'],borderWidth:0}]
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}},  datalabels:{
+    anchor:'end', align:'end',
+    color:'#c9581e',
+    font:{weight:'600', size:12},
+    formatter: v => v > 0 ? v.toFixed(2) : ''
+  }}}
     });
     activeCharts.push(npsChart);
 
@@ -1357,7 +1367,12 @@ async function renderDashboard() {
         labels:Object.keys(srcCount),
         datasets:[{data:Object.values(srcCount),backgroundColor:['#152d4a','#c9581e','#e07b3c','#4a90d9','#2d7a5f','#8b5cf6'],borderWidth:0}]
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,font:{size:11}}},datalabels:{
+    anchor:'end', align:'end',
+    color:'#c9581e',
+    font:{weight:'600', size:12},
+    formatter: v => v > 0 ? v.toFixed(2) : ''
+  }}}
     });
     activeCharts.push(srcChart);
 
@@ -1368,7 +1383,12 @@ async function renderDashboard() {
         labels:Object.keys(rndCount),
         datasets:[{label:'Responses',data:Object.values(rndCount),backgroundColor:'#152d4a',borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{ticks:{stepSize:1}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true},  datalabels:{
+    anchor:'end', align:'end',
+    color:'#c9581e',
+    font:{weight:'600', size:12},
+    formatter: v => v > 0 ? v.toFixed(2) : ''
+  }},scales:{y:{ticks:{stepSize:1}}}}
     });
     activeCharts.push(rndChart);
 
@@ -1379,7 +1399,12 @@ async function renderDashboard() {
         labels:Object.keys(feelCount),
         datasets:[{label:'Responses',data:Object.values(feelCount),backgroundColor:['#4ade80','#86efac','#fb923c','#fca5a5','#f87171'],borderRadius:6}]
       },
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:true}},scales:{x:{ticks:{stepSize:1}}}}
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:true},  datalabels:{
+    anchor:'end', align:'end',
+    color:'#c9581e',
+    font:{weight:'600', size:12},
+    formatter: v => v > 0 ? v.toFixed(2) : ''
+  }},scales:{x:{ticks:{stepSize:1}}}}
     });
     activeCharts.push(feelChart);
   }, 100);
