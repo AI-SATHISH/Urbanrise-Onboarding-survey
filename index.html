@@ -1110,6 +1110,25 @@ async function renderDashboard() {
   globalAllData = all; // save for Excel export
   body.innerHTML = '';
 
+  // ── Populate recruiter filter dropdown ──
+  // store unique recruiters for repopulating dropdown after each render
+  window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
+
+  renderDashboardData(all);
+}
+
+function applyRecruiterFilter() {
+  const val = document.getElementById('recruiter-filter').value;
+  window._activeRecruiterFilter = val;
+  const filtered = val === 'all' ? globalAllData : globalAllData.filter(r => (r.recruiter || 'Not Assigned') === val);
+  activeCharts.forEach(c => c.destroy());
+  activeCharts = [];
+  renderDashboardData(filtered);
+}
+
+function renderDashboardData(all) {
+  const body = document.getElementById('dash-body');
+
   // ── Compute KPIs ──
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
@@ -1155,6 +1174,12 @@ async function renderDashboard() {
     const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
     return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgRec, avgOv };
   });
+
+  if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
+  if (window._allRecruiters === undefined) window._allRecruiters = [];
+  const activeFilter = window._activeRecruiterFilter;
+  const allRecruiters = window._allRecruiters;
+  
   body.innerHTML = `
     <div style="margin-bottom:1.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
@@ -1470,6 +1495,7 @@ async function renderDashboard() {
     activeCharts.push(feelChart);
   }, 100);
 }   
+
 // ═══════════ EXCEL EXPORT ═══════════
 function exportToExcel() {
   if (!globalAllData.length) {
