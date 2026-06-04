@@ -884,8 +884,13 @@ function bindStep() {
     const el = document.getElementById(map[f]);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
+  // Location select (dropdown)
+  const locEl = document.getElementById('i-loc');
+  if (locEl) locEl.addEventListener('change', () => response.loc = locEl.value);
+  // Recruiter select
   const recEl = document.getElementById('i-recruiter');
   if (recEl) recEl.addEventListener('change', () => response.recruiter = recEl.value);
+  // Textareas
   ['c_q10','f_q15','g_q17','o_q19','o_q20','o_q21','o_q22'].forEach(f => {
     const el = document.getElementById('i-'+f);
     if (el) el.addEventListener('input', () => response[f] = el.value);
