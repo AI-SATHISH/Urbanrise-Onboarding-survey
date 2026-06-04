@@ -1023,7 +1023,8 @@ async function submitSurvey() {
 // Add this at the very top of your script, outside any functions
 let globalData = [];
 let globalAllData = []; // stores last fetched dashboard data for Excel export
-
+window._activeRecruiterFilter = 'all';
+window._allRecruiters = [];
 // async function renderDashboard() {
 //   //localStorage.removeItem('ur_responses_v2');
 //     activeCharts.forEach(c => c.destroy());
