@@ -1364,6 +1364,16 @@ function renderDashboardData(all) {
       </div>
     </div>
   `;
+  // ── Populate recruiter dropdown ──
+  setTimeout(() => {
+    const filterEl = document.getElementById('recruiter-filter');
+    if (filterEl && window._allRecruiters && window._allRecruiters.length) {
+      filterEl.innerHTML = `<option value="all">All Recruiters</option>` +
+        window._allRecruiters.map(r =>
+          `<option value="${r}"${activeFilter === r ? ' selected' : ''}>${r}</option>`
+        ).join('');
+    }
+  }, 50);
   // ── Draw charts ──
  setTimeout(() => {
     // Section bar
