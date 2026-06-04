@@ -195,6 +195,9 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .btn-export{background:rgba(30,107,74,0.25);border:1px solid rgba(74,222,128,0.35);color:#4ade80;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
 .btn-export:hover{background:rgba(30,107,74,0.4);border-color:#4ade80}
 .btn-export:disabled{opacity:0.5;cursor:not-allowed}
+.recruiter-filter{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;cursor:pointer;outline:none;appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;min-width:160px}
+.recruiter-filter:focus{border-color:rgba(255,255,255,0.4)}
+.filter-label{font-size:11px;color:rgba(255,255,255,0.5);font-family:var(--font-head);letter-spacing:.05em;text-transform:uppercase}
 .dash-body{padding:1.75rem 1.5rem;max-width:1100px;width:100%;margin:0 auto}
 .dash-section-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
 .dash-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -502,7 +505,7 @@ const stepHTML = [
         <div class="q-block" style="margin-top:12px"><div class="q-label">Recruiter Name <span class="req">*</span></div>
         <select class="q-input" id="i-recruiter">
           <option value="">— Select Recruiter —</option>
-          ${['Anurag Kumar - Singh','Kamal Nath - J','Sangeetha Devi - Velkumar','Archana - Gupta','Soma - Mohanty','Sanjay - V','Komal - Dev G D','Varun Kumar - Chakka','Hari Krishna - Maddugalla','Bharani - Rayala','Sejal Sanjay - Choudhary','Srujan - Devabhaktuni'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
+          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Bharani Rayala','Sejal Sanjay Choudhary','Srujan Devabhaktuni'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
     <div class="section-card">
@@ -1153,7 +1156,15 @@ async function renderDashboard() {
   });
   body.innerHTML = `
     <div style="margin-bottom:1.75rem">
-      <div class="dash-section-title">Key Metrics</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div class="dash-section-title" style="margin-bottom:0;flex:1">Key Metrics</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head)">Recruiter</span>
+          <select id="recruiter-filter" onchange="applyRecruiterFilter()" style="background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;min-width:180px;cursor:pointer;box-shadow:var(--shadow)">
+            <option value="all">All Recruiters</option>
+          </select>
+          ${activeFilter !== 'all' ? `<button onclick="document.getElementById('recruiter-filter').value='all';applyRecruiterFilter()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
+        </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
         <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score</div></div>
@@ -1163,6 +1174,7 @@ async function renderDashboard() {
         <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters/Math.max(all.filter(r=>r.o_nps>=0).length,1))*100)}%</div><div class="kpi-lbl">Promoter Rate</div></div>
       </div>
     </div>
+    
 
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Section-wise Performance</div>
@@ -1273,7 +1285,7 @@ async function renderDashboard() {
             <th>Job Description (avg)</th>
             <th>Interview Scheduling (avg)</th>
             <th>Panel Experience (avg)</th>
-            <th>Offer Letter (avg)</th>
+            <th>Offer Briefing & Closer</th>
             <th>Pre-Joining Support (avg)</th>
             <th>Day 1 Reception (avg)</th>
             <th>Orientation Content (avg)</th>
@@ -1489,7 +1501,7 @@ function exportToExcel() {
       'Job Description (avg)':      +avgArr(r.a_t2).toFixed(2),
       'Interview Scheduling (avg)': +avgArr(r.b_t3).toFixed(2),
       'Panel Experience (avg)':     +avgArr(r.b_t4).toFixed(2),
-      'Offer Letter (avg)':         +avgArr(r.c_t6).toFixed(2),
+      'Offer Briefing & Closer':         +avgArr(r.c_t6).toFixed(2),
       'Pre-Joining Support (avg)':  +avgArr(r.c_t7).toFixed(2),
       'Day 1 Reception (avg)':      +avgArr(r.d_t8).toFixed(2),
       'Orientation Content (avg)':  +avgArr(r.f_t9).toFixed(2),
