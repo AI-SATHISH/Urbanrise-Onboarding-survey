@@ -336,8 +336,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     <div class="ty-title">Thank You!</div>
     <div class="ty-sub">Your feedback is a gift to our organisation. Every response is read, analysed, and acted upon by the HR leadership team at Urbanrise.<br><br><strong style="color:rgba(255,255,255,0.85)">Welcome aboard — let's build something great together!</strong></div>
     <div class="ty-btn-row">
-      <button class="ty-btn-sec" onclick="gotoSurvey()">Submit Another Response</button>
-      <button class="ty-btn-sec" onclick="showScreen('s-landing')" style="background:rgba(201,88,30,0.25);border-color:rgba(201,88,30,0.5)">← Back to Home</button>
     </div>
   </div>
 </div>
@@ -439,7 +437,7 @@ function initResponse() {
     g_yn1:'', g_yn2:'', g_yn3:'',
     g_q12:[],
     g_t12:[0,0,0,0],
-    o_r:[0,0,0,0,0], o_nps:-1, o_nps2:-1,
+    o_r:[0,0,0], o_nps:-1, o_nps2:-1,
     o_q14:'', o_q15:''
   };
 }
@@ -1166,8 +1164,8 @@ function renderDashboardData(all) {
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
   const avgNPS2 = avg(all.map(r => r.o_nps2).filter(v => v >= 0));
-  const avgAlign = avg(all.map(r => avgArr(r.o_r[2])));
-  const avgConfidence = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
+  const avgAlign = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
+  const avgConfidence = avg(all.map(r => r.o_r[0]||0).filter(v=>v>0));
   const promoters = all.filter(r => r.o_nps >= 9).length;
   const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
   const npsValid = globalAllData.filter(r => r.o_nps >= 0);
@@ -1194,7 +1192,7 @@ function renderDashboardData(all) {
   ];
 
   const srcCount = countBy(all, r => r.src || 'Not specified');
-  const rndCount = countBy(all, r => r.b_q4 || 'Not specified');
+  const rndCount = countBy(all, r => r.b_q2 || 'Not specified');
   const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
   const feelCount = countBy(all, r => r.d_q8 || 'Not specified');
 
@@ -1209,8 +1207,8 @@ function renderDashboardData(all) {
     const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
     const avgOnb    = avg(rows.map(r => avg([avgArr(r.d_t8), avgArr(r.f_t9), avgArr(r.g_t11), avgArr(r.g_t12)].filter(v => v > 0))));
     const avgNPSo   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
-    const avgConfo  = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
-    const avgAlignO = avg(rows.map(r => r.o_r[4]||0).filter(v => v > 0));
+    const avgConfo  = avg(rows.map(r => r.o_r[0]||0).filter(v => v > 0));
+    const avgAlignO = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
     return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgOv, avgOnb, avgNPSo, avgConfo, avgAlignO };
   });
   const locationNames = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
@@ -1245,8 +1243,8 @@ function renderDashboardData(all) {
     const avgRec    = avg(rows.map(r => avgArr(r.a_t1)));
     const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
     const avgNPSr   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
-    const avgConf   = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
-    const avgAlignR = avg(rows.map(r => r.o_r[4]||0).filter(v => v > 0));
+    const avgConf   = avg(rows.map(r => r.o_r[0]||0).filter(v => v > 0));
+    const avgAlignR = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
     return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv, avgNPSr, avgConf, avgAlignR };
   });
 
