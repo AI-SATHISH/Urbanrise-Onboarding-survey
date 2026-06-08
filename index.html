@@ -203,7 +203,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .dash-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* KPI cards */
-.kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:2rem;overflow-x:auto}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:2rem;overflow-x:auto}
 .kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:.9rem .75rem .75rem;box-shadow:var(--shadow);min-width:110px}
 .kpi-val{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--primary);line-height:1}
 .kpi-lbl{font-size:12px;color:var(--muted);margin-top:6px}
@@ -256,7 +256,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
   .dash-body{padding:1rem}
   .survey-body{padding:1.25rem 1rem}
   .nps-btn{width:42px;height:42px;font-size:13px}
-  .kpi-grid{grid-template-columns:repeat(8,1fr)}
+  .kpi-grid{grid-template-columns:repeat(6,1fr)}
 }
 </style>
 </head>
@@ -682,7 +682,7 @@ const stepHTML = [
         'Overview of business units and projects',
         'Compliance, code of conduct, and POSH awareness briefing',
         'Role-specific Orientation Plan',
-        'IT and systems orientation & training',
+        'OB(ERP) & IT orientation & training',
         'Welcome Kit with Branding',
         'Overall structure and flow of the orientation program'
       ], 'f_t9')}</div>
@@ -704,13 +704,13 @@ const stepHTML = [
       <div class="q-block">
         <div class="q-label"><strong>Q10.</strong> Which topics were covered adequately? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="fq13-checks">
-          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q10.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q10">${o}</div>`).join('')}
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','OB(ERP) & IT','Medical Insurance'].map(o=>`<div class="chk${response.f_q10.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q10">${o}</div>`).join('')}
         </div>
       </div>
       <div class="q-block">
         <div class="q-label"><strong>Q11.</strong> Which topics needed more depth or were missing? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="fq14-checks">
-          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q11.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q11">${o}</div>`).join('')}
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','OB(ERP) & IT','Medical Insurance'].map(o=>`<div class="chk${response.f_q11.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q11">${o}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -750,8 +750,6 @@ const stepHTML = [
     <div class="section-card">
       <div class="section-label">Overall Satisfaction Ratings</div>
       <div id="o_r-0">${ratingTable([
-        'Overall Candidate Experience (Recruitment Phase)',
-        'Overall Onboarding & Orientation Experience (Day 1)',
         'Your confidence level in your decision to join Urbanrise',
         'Your excitement about your role and the team',
         "Your feeling of alignment with Urbanrise's culture and values"
@@ -759,7 +757,7 @@ const stepHTML = [
     </div>
     <div class="section-card">
       <div class="section-label">Recruiter &amp; Hiring Experience — NPS</div>
-      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13a.</strong> Thinking about your entire journey, from your first conversation with our recruiter to receiving your offer, how did the overall experience make you feel about Urbanrise as a place to grow your career? <span class="req">*</span></div>
+      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13a.</strong>Rate Your Overall Candidate Experience (Recruitment Phase – From Your First Conversation with Our Recruiter to Receiving Your Offer Letter)<span class="req">*</span></div>
       <div class="nps-row" id="nps-row">
         ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
           let cls = n<=6?'sel-det':n<=8?'sel-pas':'sel-pro';
@@ -779,7 +777,7 @@ const stepHTML = [
     </div>
     <div class="section-card">
       <div class="section-label">Onboarding Experience — NPS</div>
-      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13b.</strong> From the day you received your offer letter to the end of your orientation, how well did Urbanrise make you feel welcomed, supported, and ready to start? <span class="req">*</span></div>
+      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13b.</strong>Rate Your Overall Onboarding & Orientation Experience (From the Day You Received Your Offer Letter to the Completion of Your Orientation Program)<span class="req">*</span></div>
       <div class="nps-row" id="nps-row-2">
         ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
           let cls = n<=6?'sel-det':n<=8?'sel-pas':'sel-pro';
@@ -1168,7 +1166,7 @@ function renderDashboardData(all) {
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
   const avgNPS2 = avg(all.map(r => r.o_nps2).filter(v => v >= 0));
-  const avgOverall = avg(all.map(r => avgArr(r.o_r)));
+  const avgAlign = avg(all.map(r => avgArr(r.o_r[2])));
   const avgConfidence = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
   const promoters = all.filter(r => r.o_nps >= 9).length;
   const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
@@ -1208,9 +1206,12 @@ function renderDashboardData(all) {
     const pass  = valid.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
     const det   = valid.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
     const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
-    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
-    const avgOnb = avg(rows.map(r => avg([avgArr(r.d_t8), avgArr(r.f_t9), avgArr(r.g_t11), avgArr(r.g_t12)].filter(v => v > 0))));
-    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgOv, avgOnb };
+    const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
+    const avgOnb    = avg(rows.map(r => avg([avgArr(r.d_t8), avgArr(r.f_t9), avgArr(r.g_t11), avgArr(r.g_t12)].filter(v => v > 0))));
+    const avgNPSo   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
+    const avgConfo  = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
+    const avgAlignO = avg(rows.map(r => r.o_r[4]||0).filter(v => v > 0));
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgOv, avgOnb, avgNPSo, avgConfo, avgAlignO };
   });
   const locationNames = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
   const locationStats = locationNames.map(loc => {
@@ -1241,9 +1242,12 @@ function renderDashboardData(all) {
     const pass2  = valid2.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
     const det2   = valid2.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
     const enps2  = valid2.length ? Math.round(((prom2 - det2) / valid2.length) * 100) : null;
-    const avgRec = avg(rows.map(r => avgArr(r.a_t1)));
-    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
-    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv };
+    const avgRec    = avg(rows.map(r => avgArr(r.a_t1)));
+    const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
+    const avgNPSr   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
+    const avgConf   = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
+    const avgAlignR = avg(rows.map(r => r.o_r[4]||0).filter(v => v > 0));
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv, avgNPSr, avgConf, avgAlignR };
   });
 
   if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
@@ -1280,22 +1284,11 @@ function renderDashboardData(all) {
       </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score (Recruiting)</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:${npsScore2>=50?'var(--green)':npsScore2>=0?'#d97706':'#dc2626'}">${npsScore2}</div><div class="kpi-lbl">eNPS Score (Onboarding)</div></div>
-        <div class="kpi"><div class="kpi-val">${avgOverall.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Overall Score</div></div>
-        <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Rating</div></div>
-        <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Confidence Score</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${npsValid.length ? Math.round((promoters/npsValid.length)*100) : 0}%</div><div class="kpi-lbl">Promoter Rate (Recruiting)</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters2/Math.max(npsValidCount2,1))*100)}%</div><div class="kpi-lbl">Promoter Rate (Onboarding)</div></div>
-      </div>
-    </div>
-
-    <div style="margin-bottom:1.75rem">
-      <div class="dash-section-title">Section-wise Performance</div>
-      <div class="chart-card">
-        <div class="chart-title">Average Ratings by Touchpoint</div>
-        <div class="chart-sub">Scale 1–5 across all ${n} responses</div>
-        <div class="chart-wrap" style="height:320px"><canvas id="ch-sections"></canvas></div>
+        <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score (Candidate Experience)</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:${npsScore2>=50?'var(--green)':npsScore2>=0?'#d97706':'#dc2626'}">${npsScore2}</div><div class="kpi-lbl">eNPS Score (Onboarding & Orientation Experience)</div></div>
+        <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Score</div></div>
+        <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Overall Confidence Score on Urbanrise</div></div>
+        <div class="kpi"><div class="kpi-val">${avgAlign.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Overall Alignment Score on Urbanrise Culture</div></div>
       </div>
     </div>
 
@@ -1309,6 +1302,15 @@ function renderDashboardData(all) {
         <div class="chart-title">Onboarding eNPS Distribution</div>
         <div class="chart-sub">Promoters, Passives, Detractors (Q13b)</div>
         <div class="chart-wrap" style="height:220px"><canvas id="ch-nps2"></canvas></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Section-wise Performance</div>
+      <div class="chart-card">
+        <div class="chart-title">Average Ratings by Touchpoint</div>
+        <div class="chart-sub">Scale 1–5 across all ${n} responses</div>
+        <div class="chart-wrap" style="height:320px"><canvas id="ch-sections"></canvas></div>
       </div>
     </div>
     <div class="chart-grid" style="margin-bottom:1.75rem">
@@ -1342,12 +1344,16 @@ function renderDashboardData(all) {
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>Recruiter</th><th>Responses</th><th>Promoters</th><th>Passives</th>
-            <th>Detractors</th><th>eNPS Score</th><th>Avg Recruiter Rating</th><th>Avg Overall Rating</th>
+            <th>Recruiter</th><th>Responses</th>
+            <th>Rec. Promoters</th><th>Rec. Passives</th><th>Rec. Detractors</th><th>eNPS (Recruiting)</th>
+            <th>Onb. Promoters</th><th>Onb. Passives</th><th>Onb. Detractors</th><th>eNPS (Onboarding)</th>
+            <th>Avg NPS Score</th><th>Avg Confidence</th><th>Avg Alignment</th>
+            <th>Avg Recruiter Rating</th><th>Avg Overall Rating</th>
           </tr></thead>
           <tbody>
             ${recruiterStats.map(s => {
             const enpsColor = s.enps === null ? 'var(--muted)' : s.enps >= 50 ? 'var(--green)' : s.enps >= 0 ? '#d97706' : '#dc2626';
+            const enpsColor2 = s.enps2 === null ? 'var(--muted)' : s.enps2 >= 50 ? 'var(--green)' : s.enps2 >= 0 ? '#d97706' : '#dc2626';
             return `<tr>
             <td><strong>${escHtml(s.name)}</strong></td>
             <td>${s.total}</td>
@@ -1355,6 +1361,13 @@ function renderDashboardData(all) {
             <td><span class="badge y">${s.pass}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.pass/s.valid)*100) : 0}%)</span></td>
             <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.det/s.valid)*100) : 0}%)</span></td>
             <td><strong style="font-size:18px;color:${enpsColor}">${s.enps === null ? '—' : s.enps}</strong></td>
+            <td><span class="badge g">${s.prom2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.prom2/s.valid2)*100) : 0}%)</span></td>
+            <td><span class="badge y">${s.pass2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.pass2/s.valid2)*100) : 0}%)</span></td>
+            <td><span class="badge r">${s.det2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.det2/s.valid2)*100) : 0}%)</span></td>
+            <td><strong style="font-size:18px;color:${enpsColor2}">${s.enps2 === null ? '—' : s.enps2}</strong></td>
+            <td>${s.avgNPSr > 0 ? s.avgNPSr.toFixed(1) : '—'}</td>
+            <td>${s.avgConf > 0 ? s.avgConf.toFixed(1) : '—'}</td>
+            <td>${s.avgAlignR > 0 ? s.avgAlignR.toFixed(1) : '—'}</td>
             <td>${starSpan(s.avgRec)}</td>
             <td>${starSpan(s.avgOv)}</td>
             </tr>`;
@@ -1370,7 +1383,9 @@ function renderDashboardData(all) {
         <table class="resp-table">
           <thead><tr>
             <th>Onboarding Coordinator</th><th>Responses</th><th>Promoters</th><th>Passives</th>
-            <th>Detractors</th><th>eNPS Score</th><th>Avg Onboarding Rating</th><th>Avg Overall Rating</th>
+            <th>Detractors</th><th>eNPS Score (Onboarding)</th>
+            <th>Avg NPS Score</th><th>Avg Confidence</th><th>Avg Alignment</th>
+            <th>Avg Onboarding Rating</th><th>Avg Overall Rating</th>
           </tr></thead>
           <tbody>
             ${onboarderStats.map(s => {
@@ -1384,6 +1399,9 @@ function renderDashboardData(all) {
                 <td><span class="badge y">${s.pass}</span></td>
                 <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${detPct}%)</span></td>
                 <td><strong style="font-size:18px;color:${enpsColor}">${s.enps === null ? '—' : s.enps}</strong></td>
+                <td>${s.avgNPSo > 0 ? s.avgNPSo.toFixed(1) : '—'}</td>
+                <td>${s.avgConfo > 0 ? s.avgConfo.toFixed(1) : '—'}</td>
+                <td>${s.avgAlignO > 0 ? s.avgAlignO.toFixed(1) : '—'}</td>
                 <td>${starSpan(s.avgOnb)}</td>
                 <td>${starSpan(s.avgOv)}</td>
               </tr>`;
