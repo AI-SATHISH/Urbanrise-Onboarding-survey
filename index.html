@@ -203,9 +203,9 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .dash-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* KPI cards */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:2rem}
-.kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:1.25rem 1.25rem 1rem;box-shadow:var(--shadow)}
-.kpi-val{font-family:var(--font-head);font-size:34px;font-weight:700;color:var(--primary);line-height:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:2rem;overflow-x:auto}
+.kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:.9rem .75rem .75rem;box-shadow:var(--shadow);min-width:110px}
+.kpi-val{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--primary);line-height:1}
 .kpi-lbl{font-size:12px;color:var(--muted);margin-top:6px}
 .kpi-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
 
@@ -256,7 +256,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
   .dash-body{padding:1rem}
   .survey-body{padding:1.25rem 1rem}
   .nps-btn{width:42px;height:42px;font-size:13px}
-  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi-grid{grid-template-columns:repeat(8,1fr)}
 }
 </style>
 </head>
@@ -420,27 +420,27 @@ function initResponse() {
   return {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     ts: new Date().toISOString(),
-    name:'', empId:'', role:'', dept:'', doj:'', loc:'', mgr:'', src:'',recruiter:'',
-    a_t1:[0,0,0,0], a_q1:'', a_q2:'',
+    name:'', empId:'', role:'', dept:'', doj:'', loc:'', mgr:'',recruiter:'', onboarder:'', src:'',
+    a_t1:[0,0,0,0], a_q1:'',
     a_t2:[0,0,0],
-    b_t3:[0,0,0,0], b_q4:'', b_q5:'',
-    b_t4:[0,0,0,0,0], b_q6:'',
-    b_t5:[0,0,0], b_q7:'',
-    c_t6:[0,0,0,0,0], c_q8:'',
+    b_t3:[0,0,0,0], b_q2:'', b_q3:'',
+    b_t4:[0,0,0,0,0], b_q4:'',
+    b_t5:[0,0,0], b_q5:'',
+    c_t6:[0,0,0,0,0], c_q6:'',
     c_t7:[0,0,0,0,0],
     c_yn1:'', c_yn2:'', c_yn3:'', c_yn4:'',
-    c_q9:'', c_q10:'',
+    c_q7:'',
     d_t8:[0,0,0],
     d_yn1:'', d_yn2:'', d_yn3:'',
-    d_q11:'',
+    d_q8:'',
     f_t9:[0,0,0,0,0,0,0,0,0],
-    f_t10:[0,0,0,0], f_q12:'', f_q13:[], f_q14:[], f_q15:'',
+    f_t10:[0,0,0,0], f_q9:'', f_q10:[], f_q11:[],
     g_t11:[0,0,0,0,0],
     g_yn1:'', g_yn2:'', g_yn3:'',
-    g_q16:[], g_q17:'',
+    g_q12:[],
     g_t12:[0,0,0,0],
-    o_r:[0,0,0,0,0], o_nps:-1,
-    o_q19:'', o_q20:'', o_q21:'', o_q22:''
+    o_r:[0,0,0,0,0], o_nps:-1, o_nps2:-1,
+    o_q14:'', o_q15:''
   };
 }
 
@@ -515,6 +515,12 @@ const stepHTML = [
           ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Bharani Rayala','Sejal Sanjay Choudhary','Srujan Devabhaktuni'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
+    <div class="q-block" style="margin-top:12px"><div class="q-label">Onboarding Coordinator Name <span class="req">*</span></div>
+        <select class="q-input" id="i-onboarder">
+          <option value="">— Select Onboarding Coordinator —</option>
+          ${['Kamal Nath J','Natasha Pramod Patkar','Rashika Poovaiah','Sangeetha Devi Velkumar','Sanjay V','Komal  Dev G D'].map(r=>`<option value="${r}"${response.onboarder===r?' selected':''}>${r}</option>`).join('')}
+        </select>
+    </div>
     <div class="section-card">
       <div class="section-label">Source of Application <span class="req">*</span></div>
       <div class="opts" id="src-opts">
@@ -538,19 +544,13 @@ const stepHTML = [
           ${['Phone Call','Email','LinkedIn Message','WhatsApp','Through a Referral','Other'].map(o=>`<div class="opt${response.a_q1===o?' sel':''}" data-val="${o}" data-field="a_q1">${o}</div>`).join('')}
         </div>
       </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q2.</strong> Did the recruiter clearly explain the job role, responsibilities, and team structure? <span class="req">*</span></div>
-        <div class="opts" id="aq2-opts">
-          ${['Yes, very clearly','Somewhat clearly','It was vague','Not at all'].map(o=>`<div class="opt${response.a_q2===o?' sel':''}" data-val="${o}" data-field="a_q2">${o}</div>`).join('')}
-        </div>
-      </div>
     </div>
     <div class="section-card">
       <div class="section-label">Touchpoint 2 — Job Description & Role Clarity</div>
       <div id="a_t2-0">${ratingTable([
         'Clarity and accuracy of the Job Description provided',
         'Alignment of the role described versus the actual position',
-        'Information provided about the team, growth path, and expectations'
+        'Information provided about the team Structure & reporting, growth path, and expectations'
       ], 'a_t2')}</div>
     </div>`,
 
@@ -565,15 +565,15 @@ const stepHTML = [
         'Professionalism of the interview coordination team'
       ], 'b_t3')}</div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q4.</strong> How many rounds of interviews did you go through? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q2.</strong> How many rounds of interviews did you go through? <span class="req">*</span></div>
         <div class="opts" id="bq4-opts">
-          ${['1 round','2 rounds','3 rounds','4 or more rounds'].map(o=>`<div class="opt${response.b_q4===o?' sel':''}" data-val="${o}" data-field="b_q4">${o}</div>`).join('')}
+          ${['1 round','2 rounds','3 rounds','4 or more rounds'].map(o=>`<div class="opt${response.b_q2===o?' sel':''}" data-val="${o}" data-field="b_q2">${o}</div>`).join('')}
         </div>
       </div>
       <div class="q-block">
-        <div class="q-label"><strong>Q5.</strong> What was the mode of your interview(s)? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q3.</strong> What was the mode of your interview(s)? <span class="req">*</span></div>
         <div class="opts" id="bq5-opts">
-          ${['In-person only','Virtual only (video call)','Telephonic only','Combination of modes'].map(o=>`<div class="opt${response.b_q5===o?' sel':''}" data-val="${o}" data-field="b_q5">${o}</div>`).join('')}
+          ${['In-person only','Virtual only (video call)','Telephonic only','Combination of modes'].map(o=>`<div class="opt${response.b_q3===o?' sel':''}" data-val="${o}" data-field="b_q3">${o}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -587,9 +587,9 @@ const stepHTML = [
         'Overall comfort level during the interview'
       ], 'b_t4')}</div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q6.</strong> Were you given a fair and adequate opportunity to showcase your skills? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q4.</strong> Were you given a fair and adequate opportunity to showcase your skills? <span class="req">*</span></div>
         <div class="opts" id="bq6-opts">
-          ${['Yes, absolutely','Mostly yes','Somewhat','No, not really'].map(o=>`<div class="opt${response.b_q6===o?' sel':''}" data-val="${o}" data-field="b_q6">${o}</div>`).join('')}
+          ${['Yes, absolutely','Mostly yes','Somewhat','No, not really'].map(o=>`<div class="opt${response.b_q4===o?' sel':''}" data-val="${o}" data-field="b_q4">${o}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -601,9 +601,9 @@ const stepHTML = [
         'Professionalism of the offer or feedback call / message'
       ], 'b_t5')}</div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q7.</strong> How long did it take to receive the final offer after your last interview? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q5.</strong> How long did it take to receive the final offer after your last interview? <span class="req">*</span></div>
         <div class="opts" id="bq7-opts">
-          ${['Same day','Within 2–3 days','Within a week','More than a week','More than 2 weeks'].map(o=>`<div class="opt${response.b_q7===o?' sel':''}" data-val="${o}" data-field="b_q7">${o}</div>`).join('')}
+          ${['Same day','Within 2–3 days','Within a week','More than a week','More than 2 weeks'].map(o=>`<div class="opt${response.b_q5===o?' sel':''}" data-val="${o}" data-field="b_q5">${o}</div>`).join('')}
         </div>
       </div>
     </div>`,
@@ -620,9 +620,9 @@ const stepHTML = [
         'Quality and professionalism of the offer letter document'
       ], 'c_t6')}</div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q8.</strong> Was your offer letter issued within the committed timeline? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q6.</strong> Was your offer letter issued within the committed timeline? <span class="req">*</span></div>
         <div class="opts" id="cq8-opts">
-          ${['Yes, on time','Slightly delayed','Significantly delayed','No timeline was communicated'].map(o=>`<div class="opt${response.c_q8===o?' sel':''}" data-val="${o}" data-field="c_q8">${o}</div>`).join('')}
+          ${['Yes, on time','Slightly delayed','Significantly delayed','No timeline was communicated'].map(o=>`<div class="opt${response.c_q6===o?' sel':''}" data-val="${o}" data-field="c_q6">${o}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -638,18 +638,14 @@ const stepHTML = [
       <div class="yn-grid" style="margin-top:1rem">
         <div id="c_yn1">${ynRow('Did you receive a clear joining checklist before your joining date?','c_yn1')}</div>
         <div id="c_yn2">${ynRow('Were you informed about your reporting location, time, and person to report to?','c_yn2')}</div>
-        <div id="c_yn3">${ynRow('Did you receive a welcome kit or joining instructions prior to Day 1?','c_yn3')}</div>
+        <div id="c_yn3">${ynRow('Did you receive a joining instructions prior to Day 1?','c_yn3')}</div>
         <div id="c_yn4">${ynRow('Were your logistical queries (travel, accommodation, etc.) addressed by HR?','c_yn4')}</div>
       </div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q9.</strong> How would you describe the overall pre-joining communication from Urbanrise? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q7.</strong> How would you describe the overall pre-joining communication from Urbanrise? <span class="req">*</span></div>
         <div class="opts" id="cq9-opts">
-          ${['Excellent — I felt fully prepared','Good — mostly covered','Average — some gaps','Poor — I was largely unprepared'].map(o=>`<div class="opt${response.c_q9===o?' sel':''}" data-val="${o}" data-field="c_q9">${o}</div>`).join('')}
+          ${['Excellent — I felt fully prepared','Good — mostly covered','Average — some gaps','Poor — I was largely unprepared'].map(o=>`<div class="opt${response.c_q7===o?' sel':''}" data-val="${o}" data-field="c_q7">${o}</div>`).join('')}
         </div>
-      </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q10.</strong> Is there anything specific that was missing or could have been communicated better before joining? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-c_q10" placeholder="Share your thoughts...">${response.c_q10}</textarea>
       </div>
     </div>`,
 
@@ -665,12 +661,12 @@ const stepHTML = [
       <div class="yn-grid" style="margin-top:1rem">
         <div id="d_yn1">${ynRow('Were you expected and recognised when you arrived? (Was your arrival pre-informed to reception?)','d_yn1')}</div>
         <div id="d_yn2">${ynRow('Was someone designated to receive you and guide you on Day 1?','d_yn2')}</div>
-        <div id="d_yn3">${ynRow('Was there a dedicated welcome kit or desk setup ready for you on arrival?','d_yn3')}</div>
+        <div id="d_yn3">${ynRow('Was there a dedicated welcome kit ready for you on arrival?','d_yn3')}</div>
       </div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q11.</strong> How did your arrival at Urbanrise make you feel on Day 1? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q8.</strong> How did your arrival at Urbanrise make you feel on Day 1? <span class="req">*</span></div>
         <div class="opts" id="dq11-opts">
-          ${['Very welcomed and excited','Welcomed','Neutral','Slightly uncomfortable','Unwelcomed / anxious'].map(o=>`<div class="opt${response.d_q11===o?' sel':''}" data-val="${o}" data-field="d_q11">${o}</div>`).join('')}
+          ${['Very welcomed and excited','Welcomed','Neutral','Slightly uncomfortable','Unwelcomed / anxious'].map(o=>`<div class="opt${response.d_q8===o?' sel':''}" data-val="${o}" data-field="d_q8">${o}</div>`).join('')}
         </div>
       </div>
     </div>`,
@@ -682,7 +678,7 @@ const stepHTML = [
       <div id="f_t9-0">${ratingTable([
         'Introduction to Urbanrise — Vision, Mission, and Core Values',
         'Overview of organisational structure and key leadership',
-        'Introduction to HR policies, benefits, and leave management',
+        'Introduction to HR policies, benefits, and mediclaim policy',
         'Overview of business units and projects',
         'Compliance, code of conduct, and POSH awareness briefing',
         'Role-specific Orientation Plan',
@@ -700,26 +696,22 @@ const stepHTML = [
         'Time management and scheduling of the orientation'
       ], 'f_t10')}</div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q12.</strong> How was the orientation conducted? <span class="req">*</span></div>
+        <div class="q-label"><strong>Q9.</strong> How was the orientation conducted? <span class="req">*</span></div>
         <div class="opts" id="fq12-opts">
-          ${['In-person group session','One-on-one with HR','Virtual session (online)','Self-paced (reading materials/portal)','Combination'].map(o=>`<div class="opt${response.f_q12===o?' sel':''}" data-val="${o}" data-field="f_q12">${o}</div>`).join('')}
+          ${['In-person group session','One-on-one with HR','Virtual session (online)','Self-paced (reading materials/portal)','Combination'].map(o=>`<div class="opt${response.f_q9===o?' sel':''}" data-val="${o}" data-field="f_q9">${o}</div>`).join('')}
         </div>
       </div>
       <div class="q-block">
-        <div class="q-label"><strong>Q13.</strong> Which topics were covered adequately? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="q-label"><strong>Q10.</strong> Which topics were covered adequately? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="fq13-checks">
-          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q13.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q13">${o}</div>`).join('')}
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q10.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q10">${o}</div>`).join('')}
         </div>
       </div>
       <div class="q-block">
-        <div class="q-label"><strong>Q14.</strong> Which topics needed more depth or were missing? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="q-label"><strong>Q11.</strong> Which topics needed more depth or were missing? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="fq14-checks">
-          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q14.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q14">${o}</div>`).join('')}
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','IT & Systems'].map(o=>`<div class="chk${response.f_q11.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q11">${o}</div>`).join('')}
         </div>
-      </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q15.</strong> What is the single most useful thing you learned during today's orientation? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-f_q15" placeholder="Share what stood out most...">${response.f_q15}</textarea>
       </div>
     </div>
     <div class="section-card">
@@ -737,14 +729,10 @@ const stepHTML = [
         <div id="g_yn3">${ynRow('Was your OB access enabled on Day 1?','g_yn3')}</div>
       </div>
       <div class="q-block" style="margin-top:1.25rem">
-        <div class="q-label"><strong>Q16.</strong> Which of the following was NOT ready on your Day 1? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
+        <div class="q-label"><strong>Q12.</strong> Which of the following was NOT ready on your Day 1? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="gq16-checks">
-          ${['Laptop / Desktop','Email Access','System Login Credentials','Access Card / ID Badge','Seating / Workstation','Software Tools','OB Login','Everything was ready'].map(o=>`<div class="chk${response.g_q16.includes(o)?' sel':''}" data-val="${o}" data-arr="g_q16">${o}</div>`).join('')}
+          ${['Laptop / Desktop','Email Access','System Login Credentials','Access Card / ID Badge','Seating / Workstation','Software Tools','OB Login','Everything was ready','Sim Card'].map(o=>`<div class="chk${response.g_q12.includes(o)?' sel':''}" data-val="${o}" data-arr="g_q12">${o}</div>`).join('')}
         </div>
-      </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q17.</strong> Please describe any infrastructure or access issues you faced on Day 1. <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-g_q17" placeholder="Describe any issues and how they impacted you...">${response.g_q17}</textarea>
       </div>
     </div>
     <div class="section-card">
@@ -770,8 +758,8 @@ const stepHTML = [
       ], 'o_r')}</div>
     </div>
     <div class="section-card">
-      <div class="section-label">Net Promoter Score — Urbanrise as an Employer</div>
-      <div class="q-label"><strong>Q18.</strong> On a scale of 0–10, how likely are you to recommend Urbanrise as a great place to work? <span class="req">*</span></div>
+      <div class="section-label">Recruiter &amp; Hiring Experience — NPS</div>
+      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13a.</strong> Thinking about your entire journey, from your first conversation with our recruiter to receiving your offer, how did the overall experience make you feel about Urbanrise as a place to grow your career? <span class="req">*</span></div>
       <div class="nps-row" id="nps-row">
         ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
           let cls = n<=6?'sel-det':n<=8?'sel-pas':'sel-pro';
@@ -779,10 +767,30 @@ const stepHTML = [
           return `<button type="button"
                 class="nps-btn${sel}"
                 data-n="${n}"
-                onclick="setNPS(${n})">${n}</button>`;
+                onclick="setNPS(${n},'o_nps','nps-row')">${n}</button>`;
         }).join('')}
       </div>
-      <div class="nps-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
+      <div class="nps-labels"><span>Not at all positive</span><span>Extremely positive</span></div>
+      <div class="nps-scale-info" style="margin-top:10px">
+        <span class="nps-tag d">0–6 Detractors</span>
+        <span class="nps-tag p">7–8 Passives</span>
+        <span class="nps-tag pr">9–10 Promoters</span>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-label">Onboarding Experience — NPS</div>
+      <div class="q-label" style="margin-bottom:14px;line-height:1.6"><strong>Q13b.</strong> From the day you received your offer letter to the end of your orientation, how well did Urbanrise make you feel welcomed, supported, and ready to start? <span class="req">*</span></div>
+      <div class="nps-row" id="nps-row-2">
+        ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
+          let cls = n<=6?'sel-det':n<=8?'sel-pas':'sel-pro';
+          let sel = response.o_nps2===n?' '+cls:'';
+          return `<button type="button"
+                class="nps-btn${sel}"
+                data-n="${n}"
+                onclick="setNPS(${n},'o_nps2','nps-row-2')">${n}</button>`;
+        }).join('')}
+      </div>
+      <div class="nps-labels"><span>Not at all well</span><span>Extremely well</span></div>
       <div class="nps-scale-info" style="margin-top:10px">
         <span class="nps-tag d">0–6 Detractors</span>
         <span class="nps-tag p">7–8 Passives</span>
@@ -792,20 +800,12 @@ const stepHTML = [
     <div class="section-card">
       <div class="section-label">Open Feedback</div>
       <div class="q-block">
-        <div class="q-label"><strong>Q19.</strong> What was the BEST part of your candidate and Day 1 onboarding experience at Urbanrise? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-o_q19" placeholder="Share what impressed you most...">${response.o_q19}</textarea>
+        <div class="q-label"><strong>Q14.</strong> Do you have any specific suggestions for improving our recruitment or onboarding process? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q14" placeholder="Your ideas matter...">${response.o_q14}</textarea>
       </div>
       <div class="q-block">
-        <div class="q-label"><strong>Q20.</strong> What could Urbanrise have done DIFFERENTLY to make your joining experience better? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-o_q20" placeholder="Constructive suggestions are welcome...">${response.o_q20}</textarea>
-      </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q21.</strong> Do you have any specific suggestions for improving our recruitment or onboarding process? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-o_q21" placeholder="Your ideas matter...">${response.o_q21}</textarea>
-      </div>
-      <div class="q-block">
-        <div class="q-label"><strong>Q22.</strong> Any other comments, observations, or appreciation you would like to share? <span class="req">*</span></div>
-        <textarea class="q-textarea" id="i-o_q22" placeholder="Anything else on your mind...">${response.o_q22}</textarea>
+        <div class="q-label"><strong>Q15.</strong> Any other comments, observations, or appreciation you would like to share? <span class="req">*</span></div>
+        <textarea class="q-textarea" id="i-o_q15" placeholder="Anything else on your mind...">${response.o_q15}</textarea>
       </div>
     </div>`,
 ];
@@ -893,27 +893,26 @@ function bindStep() {
   // Recruiter select
   const recEl = document.getElementById('i-recruiter');
   if (recEl) recEl.addEventListener('change', () => response.recruiter = recEl.value);
+  // Onboarder select
+  const obEl = document.getElementById('i-onboarder');
+  if (obEl) obEl.addEventListener('change', () => response.onboarder = obEl.value);
   // Textareas
-  ['c_q10','f_q15','g_q17','o_q19','o_q20','o_q21','o_q22'].forEach(f => {
+  ['o_q14','o_q15'].forEach(f => {
     const el = document.getElementById('i-'+f);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
 }
 
-window.setNPS = function(n) {
-    response.o_nps = n;
-
-    document.querySelectorAll('.nps-btn').forEach(b => {
+window.setNPS = function(n, field, rowId) {
+    response[field] = n;
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    row.querySelectorAll('.nps-btn').forEach(b => {
         b.classList.remove('sel-det', 'sel-pas', 'sel-pro');
-
         if (parseInt(b.dataset.n) === n) {
-            if (n <= 6) {
-                b.classList.add('sel-det');
-            } else if (n <= 8) {
-                b.classList.add('sel-pas');
-            } else {
-                b.classList.add('sel-pro');
-            }
+            if (n <= 6) b.classList.add('sel-det');
+            else if (n <= 8) b.classList.add('sel-pas');
+            else b.classList.add('sel-pro');
         }
     });
 };
@@ -938,63 +937,59 @@ function getStepValidationErrors(step) {
     if (blank(response.loc)) errs.push({id:'i-loc'});
     if (blank(response.mgr)) errs.push({id:'i-mgr'});
     if (blank(response.recruiter)) errs.push({id:'i-recruiter'});
+    if (blank(response.onboarder)) errs.push({id:'i-onboarder'});
     if (blank(response.src)) errs.push({id:'src-opts'});
   }
   if (step === 1) {
     if (unrated(response.a_t1)) errs.push({id:'a_t1-0'});
     if (blank(response.a_q1)) errs.push({id:'aq1-opts'});
-    if (blank(response.a_q2)) errs.push({id:'aq2-opts'});
     if (unrated(response.a_t2)) errs.push({id:'a_t2-0'});
   }
   if (step === 2) {
     if (unrated(response.b_t3)) errs.push({id:'b_t3-0'});
-    if (blank(response.b_q4)) errs.push({id:'bq4-opts'});
-    if (blank(response.b_q5)) errs.push({id:'bq5-opts'});
+    if (blank(response.b_q2)) errs.push({id:'bq2-opts'});
+    if (blank(response.b_q3)) errs.push({id:'bq5-opts'});
     if (unrated(response.b_t4)) errs.push({id:'b_t4-0'});
-    if (blank(response.b_q6)) errs.push({id:'bq6-opts'});
+    if (blank(response.b_q4)) errs.push({id:'bq6-opts'});
     if (unrated(response.b_t5)) errs.push({id:'b_t5-0'});
-    if (blank(response.b_q7)) errs.push({id:'bq7-opts'});
+    if (blank(response.b_q5)) errs.push({id:'bq7-opts'});
   }
   if (step === 3) {
     if (unrated(response.c_t6)) errs.push({id:'c_t6-0'});
-    if (blank(response.c_q8)) errs.push({id:'cq8-opts'});
+    if (blank(response.c_q6)) errs.push({id:'cq8-opts'});
     if (unrated(response.c_t7)) errs.push({id:'c_t7-0'});
     if (blank(response.c_yn1)) errs.push({id:'c_yn1'});
     if (blank(response.c_yn2)) errs.push({id:'c_yn2'});
     if (blank(response.c_yn3)) errs.push({id:'c_yn3'});
     if (blank(response.c_yn4)) errs.push({id:'c_yn4'});
-    if (blank(response.c_q9)) errs.push({id:'cq9-opts'});
-    if (blank(response.c_q10)) errs.push({id:'i-c_q10'});
+    if (blank(response.c_q7)) errs.push({id:'cq9-opts'});
   }
   if (step === 4) {
     if (unrated(response.d_t8)) errs.push({id:'d_t8-0'});
     if (blank(response.d_yn1)) errs.push({id:'d_yn1'});
     if (blank(response.d_yn2)) errs.push({id:'d_yn2'});
     if (blank(response.d_yn3)) errs.push({id:'d_yn3'});
-    if (blank(response.d_q11)) errs.push({id:'dq11-opts'});
+    if (blank(response.d_q8)) errs.push({id:'dq11-opts'});
   }
   if (step === 5) {
     if (unrated(response.f_t9)) errs.push({id:'f_t9-0'});
     if (unrated(response.f_t10)) errs.push({id:'f_t10-0'});
-    if (blank(response.f_q12)) errs.push({id:'fq12-opts'});
-    if (emptyArr(response.f_q13)) errs.push({id:'fq13-checks'});
-    if (emptyArr(response.f_q14)) errs.push({id:'fq14-checks'});
-    if (blank(response.f_q15)) errs.push({id:'i-f_q15'});
+    if (blank(response.f_q9)) errs.push({id:'fq12-opts'});
+    if (emptyArr(response.f_q10)) errs.push({id:'fq13-checks'});
+    if (emptyArr(response.f_q11)) errs.push({id:'fq14-checks'});
     if (unrated(response.g_t11)) errs.push({id:'g_t11-0'});
     if (blank(response.g_yn1)) errs.push({id:'g_yn1'});
     if (blank(response.g_yn2)) errs.push({id:'g_yn2'});
     if (blank(response.g_yn3)) errs.push({id:'g_yn3'});
-    if (emptyArr(response.g_q16)) errs.push({id:'gq16-checks'});
-    if (blank(response.g_q17)) errs.push({id:'i-g_q17'});
+    if (emptyArr(response.g_q12)) errs.push({id:'gq16-checks'});
     if (unrated(response.g_t12)) errs.push({id:'g_t12-0'});
   }
   if (step === 6) {
     if (unrated(response.o_r)) errs.push({id:'o_r-0'});
     if (response.o_nps < 0) errs.push({id:'nps-row'});
-    if (blank(response.o_q19)) errs.push({id:'i-o_q19'});
-    if (blank(response.o_q20)) errs.push({id:'i-o_q20'});
-    if (blank(response.o_q21)) errs.push({id:'i-o_q21'});
-    if (blank(response.o_q22)) errs.push({id:'i-o_q22'});
+    if (response.o_nps2 < 0) errs.push({id:'nps-row-2'});
+    if (blank(response.o_q14)) errs.push({id:'i-o_q14'});
+    if (blank(response.o_q15)) errs.push({id:'i-o_q15'});
   }
   return errs;
 }
@@ -1024,7 +1019,10 @@ function prevStep() {
 }
 async function submitSurvey() {
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
-  
+
+  // Save locally first so the dashboard always has the full response
+  saveResponse(response);
+
   // Use URLSearchParams to ensure the script receives it via e.parameter
   const formData = new URLSearchParams();
   formData.append('data', JSON.stringify(response));
@@ -1048,6 +1046,8 @@ let globalData = [];
 let globalAllData = []; // stores last fetched dashboard data for Excel export
 window._activeRecruiterFilter = 'all';
 window._allRecruiters = [];
+window._activeOnboarderFilter = 'all';
+window._allOnboarders = [];
 
 // async function renderDashboard() {
 //   //localStorage.removeItem('ur_responses_v2');
@@ -1117,8 +1117,9 @@ async function renderDashboard() {
       ];
       arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
       obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
+      obj.o_nps2 = obj.o_nps2 !== '' && obj.o_nps2 !== undefined ? Number(obj.o_nps2) : -1;
       // ── Clean " - " from name fields ──
-      ['name','mgr','recruiter'].forEach(f => {
+      ['name','mgr','recruiter','onboarder'].forEach(f => {
         if (obj[f]) obj[f] = obj[f].replace(/\s*-\s*/g, ' ').trim();
       });
       return obj;
@@ -1137,6 +1138,7 @@ async function renderDashboard() {
   // Populate recruiter & location filter options
   window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   window._allLocations  = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
+  window._allOnboarders = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
 
   renderDashboardData(all);
 }
@@ -1146,11 +1148,14 @@ function applyRecruiterFilter() { applyFilters(); }
 function applyFilters() {
   const rec = document.getElementById('recruiter-filter') ? document.getElementById('recruiter-filter').value : 'all';
   const loc = document.getElementById('location-filter')  ? document.getElementById('location-filter').value  : 'all';
-  window._activeRecruiterFilter = rec;
-  window._activeLocFilter = loc;
+  const ob  = document.getElementById('onboarder-filter') ? document.getElementById('onboarder-filter').value  : 'all';
+  window._activeRecruiterFilter  = rec;
+  window._activeLocFilter        = loc;
+  window._activeOnboarderFilter  = ob;
   let filtered = globalAllData;
   if (rec !== 'all') filtered = filtered.filter(r => (r.recruiter || 'Not Assigned') === rec);
   if (loc !== 'all') filtered = filtered.filter(r => (r.loc || 'Not Specified') === loc);
+  if (ob  !== 'all') filtered = filtered.filter(r => (r.onboarder || 'Not Assigned') === ob);
   activeCharts.forEach(c => c.destroy());
   activeCharts = [];
   renderDashboardData(filtered);
@@ -1162,12 +1167,19 @@ function renderDashboardData(all) {
   // KPIs
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
+  const avgNPS2 = avg(all.map(r => r.o_nps2).filter(v => v >= 0));
   const avgOverall = avg(all.map(r => avgArr(r.o_r)));
   const avgConfidence = avg(all.map(r => r.o_r[2]||0).filter(v=>v>0));
   const promoters = all.filter(r => r.o_nps >= 9).length;
   const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
+  const npsValid = globalAllData.filter(r => r.o_nps >= 0);
   const npsValidCount = all.filter(r=>r.o_nps>=0).length;
   const npsScore = Math.round(((promoters - detractors) / Math.max(npsValidCount,1)) * 100);
+  const promoters2 = all.filter(r => r.o_nps2 >= 9).length;
+  const detractors2 = all.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
+  const npsValidCount2 = all.filter(r=>r.o_nps2>=0).length;
+  const npsScore2 = Math.round(((promoters2 - detractors2) / Math.max(npsValidCount2,1)) * 100);
+  const npsGroups2 = {Promoters: promoters2, Passives: all.filter(r=>r.o_nps2>=7&&r.o_nps2<=8).length, Detractors: detractors2};
 
   // Section averages
   const secAvgs = [
@@ -1186,8 +1198,36 @@ function renderDashboardData(all) {
   const srcCount = countBy(all, r => r.src || 'Not specified');
   const rndCount = countBy(all, r => r.b_q4 || 'Not specified');
   const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
-  const feelCount = countBy(all, r => r.d_q11 || 'Not specified');
+  const feelCount = countBy(all, r => r.d_q8 || 'Not specified');
 
+  const onboarderNames = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
+  const onboarderStats = onboarderNames.map(name => {
+    const rows  = all.filter(r => (r.onboarder || 'Not Assigned') === name);
+    const valid = rows.filter(r => r.o_nps2 >= 0);
+    const prom  = valid.filter(r => r.o_nps2 >= 9).length;
+    const pass  = valid.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
+    const det   = valid.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
+    const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
+    const avgOnb = avg(rows.map(r => avg([avgArr(r.d_t8), avgArr(r.f_t9), avgArr(r.g_t11), avgArr(r.g_t12)].filter(v => v > 0))));
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgOv, avgOnb };
+  });
+  const locationNames = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
+  const locationStats = locationNames.map(loc => {
+    const rows   = all.filter(r => (r.loc || 'Not Specified') === loc);
+    const valid  = rows.filter(r => r.o_nps >= 0);
+    const prom   = valid.filter(r => r.o_nps >= 9).length;
+    const pass   = valid.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
+    const det    = valid.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
+    const enps   = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const valid2 = rows.filter(r => r.o_nps2 >= 0);
+    const prom2  = valid2.filter(r => r.o_nps2 >= 9).length;
+    const pass2  = valid2.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
+    const det2   = valid2.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
+    const enps2  = valid2.length ? Math.round(((prom2 - det2) / valid2.length) * 100) : null;
+    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
+    return { loc, total: rows.length, valid: valid.length, prom, pass, det, enps, promPct: valid.length ? Math.round((prom/valid.length)*100) : 0, valid2: valid2.length, prom2, pass2, det2, enps2, promPct2: valid2.length ? Math.round((prom2/valid2.length)*100) : 0, avgOv };
+  });
   const recruiterNames = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   const recruiterStats = recruiterNames.map(name => {
     const rows = all.filter(r => (r.recruiter || 'Not Assigned') === name);
@@ -1196,17 +1236,25 @@ function renderDashboardData(all) {
     const pass  = valid.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
     const det   = valid.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
     const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const valid2 = rows.filter(r => r.o_nps2 >= 0);
+    const prom2  = valid2.filter(r => r.o_nps2 >= 9).length;
+    const pass2  = valid2.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
+    const det2   = valid2.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
+    const enps2  = valid2.length ? Math.round(((prom2 - det2) / valid2.length) * 100) : null;
     const avgRec = avg(rows.map(r => avgArr(r.a_t1)));
     const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
-    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgRec, avgOv };
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv };
   });
 
   if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
   if (window._activeLocFilter === undefined) window._activeLocFilter = 'all';
+  if (window._activeOnboarderFilter === undefined) window._activeOnboarderFilter = 'all';
   if (window._allRecruiters === undefined) window._allRecruiters = [];
   if (window._allLocations === undefined) window._allLocations = [];
+  if (window._allOnboarders === undefined) window._allOnboarders = [];
   const activeFilter = window._activeRecruiterFilter;
   const activeLocFilter = window._activeLocFilter;
+  const activeOnboarderFilter = window._activeOnboarderFilter;
 
   const DROPDOWN_STYLE = `background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;box-shadow:var(--shadow);min-width:160px`;
 
@@ -1223,16 +1271,22 @@ function renderDashboardData(all) {
           <select id="recruiter-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:180px">
             <option value="all">All Recruiters</option>
           </select>
-          ${(activeFilter !== 'all' || activeLocFilter !== 'all') ? `<button onclick="document.getElementById('recruiter-filter').value='all';document.getElementById('location-filter').value='all';applyFilters()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:4px">Onboarder</span>
+          <select id="onboarder-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:180px">
+            <option value="all">All Onboarders</option>
+          </select>
+          ${(activeFilter !== 'all' || activeLocFilter !== 'all' || activeOnboarderFilter !== 'all') ? `<button onclick="document.getElementById('recruiter-filter').value='all';document.getElementById('location-filter').value='all';document.getElementById('onboarder-filter').value='all';applyFilters()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
         </div>
       </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score (Recruiting)</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:${npsScore2>=50?'var(--green)':npsScore2>=0?'#d97706':'#dc2626'}">${npsScore2}</div><div class="kpi-lbl">eNPS Score (Onboarding)</div></div>
         <div class="kpi"><div class="kpi-val">${avgOverall.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Overall Score</div></div>
         <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Rating</div></div>
         <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Avg Confidence Score</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters/Math.max(npsValidCount,1))*100)}%</div><div class="kpi-lbl">Promoter Rate</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${npsValid.length ? Math.round((promoters/npsValid.length)*100) : 0}%</div><div class="kpi-lbl">Promoter Rate (Recruiting)</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--green)">${Math.round((promoters2/Math.max(npsValidCount2,1))*100)}%</div><div class="kpi-lbl">Promoter Rate (Onboarding)</div></div>
       </div>
     </div>
 
@@ -1247,14 +1301,26 @@ function renderDashboardData(all) {
 
     <div class="chart-grid" style="margin-bottom:1.75rem">
       <div class="chart-card">
-        <div class="chart-title">eNPS Distribution</div>
-        <div class="chart-sub">Promoters, Passives, Detractors</div>
+        <div class="chart-title">Recruiting eNPS Distribution</div>
+        <div class="chart-sub">Promoters, Passives, Detractors (Q13a)</div>
         <div class="chart-wrap" style="height:220px"><canvas id="ch-nps"></canvas></div>
       </div>
+      <div class="chart-card">
+        <div class="chart-title">Onboarding eNPS Distribution</div>
+        <div class="chart-sub">Promoters, Passives, Detractors (Q13b)</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-nps2"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-grid" style="margin-bottom:1.75rem">
       <div class="chart-card">
         <div class="chart-title">Source of Application</div>
         <div class="chart-sub">How candidates found Urbanrise</div>
         <div class="chart-wrap" style="height:220px"><canvas id="ch-src"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Location-wise eNPS Distribution</div>
+        <div class="chart-sub">Recruiting vs Onboarding eNPS by city</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-loc-enps"></canvas></div>
       </div>
     </div>
 
@@ -1272,7 +1338,7 @@ function renderDashboardData(all) {
     </div>
 
     <div style="margin-bottom:1.75rem">
-      <div class="dash-section-title">Recruiter-wise eNPS Performance</div>
+      <div class="dash-section-title">Recruiter-wise — Recruiting NPS (Q13a)</div>
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
@@ -1281,9 +1347,36 @@ function renderDashboardData(all) {
           </tr></thead>
           <tbody>
             ${recruiterStats.map(s => {
+            const enpsColor = s.enps === null ? 'var(--muted)' : s.enps >= 50 ? 'var(--green)' : s.enps >= 0 ? '#d97706' : '#dc2626';
+            return `<tr>
+            <td><strong>${escHtml(s.name)}</strong></td>
+            <td>${s.total}</td>
+            <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.prom/s.valid)*100) : 0}%)</span></td>
+            <td><span class="badge y">${s.pass}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.pass/s.valid)*100) : 0}%)</span></td>
+            <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.det/s.valid)*100) : 0}%)</span></td>
+            <td><strong style="font-size:18px;color:${enpsColor}">${s.enps === null ? '—' : s.enps}</strong></td>
+            <td>${starSpan(s.avgRec)}</td>
+            <td>${starSpan(s.avgOv)}</td>
+            </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.75rem">
+      <div class="dash-section-title">Onboarder-wise — Onboarding NPS (Q13b)</div>
+      <div class="resp-table-wrap">
+        <table class="resp-table">
+          <thead><tr>
+            <th>Onboarding Coordinator</th><th>Responses</th><th>Promoters</th><th>Passives</th>
+            <th>Detractors</th><th>eNPS Score</th><th>Avg Onboarding Rating</th><th>Avg Overall Rating</th>
+          </tr></thead>
+          <tbody>
+            ${onboarderStats.map(s => {
               const enpsColor = s.enps === null ? 'var(--muted)' : s.enps >= 50 ? 'var(--green)' : s.enps >= 0 ? '#d97706' : '#dc2626';
-              const promPct = s.valid ? Math.round((s.prom/s.valid)*100) : 0;
-              const detPct  = s.valid ? Math.round((s.det/s.valid)*100) : 0;
+              const promPct   = s.valid ? Math.round((s.prom / s.valid) * 100) : 0;
+              const detPct    = s.valid ? Math.round((s.det  / s.valid) * 100) : 0;
               return `<tr>
                 <td><strong>${escHtml(s.name)}</strong></td>
                 <td>${s.total}</td>
@@ -1291,7 +1384,7 @@ function renderDashboardData(all) {
                 <td><span class="badge y">${s.pass}</span></td>
                 <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${detPct}%)</span></td>
                 <td><strong style="font-size:18px;color:${enpsColor}">${s.enps === null ? '—' : s.enps}</strong></td>
-                <td>${starSpan(s.avgRec)}</td>
+                <td>${starSpan(s.avgOnb)}</td>
                 <td>${starSpan(s.avgOv)}</td>
               </tr>`;
             }).join('')}
@@ -1301,23 +1394,95 @@ function renderDashboardData(all) {
     </div>
 
     <div style="margin-bottom:1.75rem">
-      <div class="dash-section-title">Open Feedback</div>
-      <div class="fb-grid">
-        <div class="fb-card">
-          <div class="fb-card-head"><div class="fb-card-icon" style="background:#e8f5e9">👍</div><div class="fb-card-type">Best experiences</div></div>
-          ${all.filter(r=>r.o_q19).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q19)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
-        </div>
-        <div class="fb-card">
-          <div class="fb-card-head"><div class="fb-card-icon" style="background:#fff3e0">💡</div><div class="fb-card-type">Improvement areas</div></div>
-          ${all.filter(r=>r.o_q20).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q20)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
-        </div>
-        <div class="fb-card">
-          <div class="fb-card-head"><div class="fb-card-icon" style="background:#e3f2fd">✨</div><div class="fb-card-type">Suggestions</div></div>
-          ${all.filter(r=>r.o_q21).slice(-5).reverse().map(r=>`<div class="fb-item">"${escHtml(r.o_q21)}"<div class="fb-meta">${r.name||'Anonymous'} · ${fmtDate(r.ts)}</div></div>`).join('') || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'}
-        </div>
+      <div class="dash-section-title">Location-wise Breakdown</div>
+      <div class="resp-table-wrap">
+        <table class="resp-table">
+          <thead><tr>
+            <th>Location</th><th>Responses</th>
+            <th>Recruiting Promoters</th><th>Recruiting Passives</th><th>Recruiting Detractors</th>
+            <th>Recruiting eNPS</th><th>Recruiting Promoter Rate</th>
+            <th>Onboarding Promoters</th><th>Onboarding Passives</th><th>Onboarding Detractors</th>
+            <th>Onboarding eNPS</th><th>Onboarding Promoter Rate</th>
+            <th>Avg Overall Rating</th>
+          </tr></thead>
+          <tbody>
+            ${locationStats.map(s => {
+              const ec1 = s.enps  === null ? 'var(--muted)' : s.enps  >= 50 ? 'var(--green)' : s.enps  >= 0 ? '#d97706' : '#dc2626';
+              const ec2 = s.enps2 === null ? 'var(--muted)' : s.enps2 >= 50 ? 'var(--green)' : s.enps2 >= 0 ? '#d97706' : '#dc2626';
+              return `<tr>
+              <td><strong>${escHtml(s.loc)}</strong></td>
+              <td>${s.total}</td>
+              <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.prom/s.valid)*100) : 0}%)</span></td>
+              <td><span class="badge y">${s.pass}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.pass/s.valid)*100) : 0}%)</span></td>
+              <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.det/s.valid)*100) : 0}%)</span></td>
+              <td><strong style="font-size:18px;color:${ec1}">${s.enps === null ? '—' : s.enps}</strong></td>
+              <td><span style="font-size:15px;font-weight:600;color:${s.valid && Math.round((s.prom/s.valid)*100)>=50?'var(--green)':'#d97706'}">${s.valid ? Math.round((s.prom/s.valid)*100)+'%' : '—'}</span></td>
+              <td><span class="badge g">${s.prom2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.prom2/s.valid2)*100) : 0}%)</span></td>
+              <td><span class="badge y">${s.pass2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.pass2/s.valid2)*100) : 0}%)</span></td>
+              <td><span class="badge r">${s.det2}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid2 ? Math.round((s.det2/s.valid2)*100) : 0}%)</span></td>
+              <td><strong style="font-size:18px;color:${ec2}">${s.enps2 === null ? '—' : s.enps2}</strong></td>
+              <td><span style="font-size:15px;font-weight:600;color:${s.valid2 && Math.round((s.prom2/s.valid2)*100)>=50?'var(--green)':'#d97706'}">${s.valid2 ? Math.round((s.prom2/s.valid2)*100)+'%' : '—'}</span></td>
+              <td>${starSpan(s.avgOv)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
     </div>
 
+    <div style="margin-bottom:1.75rem">
+  <div class="dash-section-title">Open Feedback</div>
+
+  <div class="fb-grid" style="grid-template-columns:1fr 1fr;">
+
+    <!-- Improvement Areas -->
+    <div class="fb-card">
+      <div class="fb-card-head">
+        <div class="fb-card-icon" style="background:#e3f2fd">✨</div>
+        <div class="fb-card-type">Improvement Areas</div>
+      </div>
+
+      ${
+        all.filter(r => r.o_q14)
+          .slice(-5)
+          .reverse()
+          .map(r => `
+            <div class="fb-item">
+              "${escHtml(r.o_q14)}"
+              <div class="fb-meta">
+                ${r.name || 'Anonymous'} · ${fmtDate(r.ts)}
+              </div>
+            </div>
+          `).join('')
+        || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'
+      }
+    </div>
+
+    <!-- Suggestions -->
+    <div class="fb-card">
+      <div class="fb-card-head">
+        <div class="fb-card-icon" style="background:#e8f5e9">💡</div>
+        <div class="fb-card-type">Suggestions</div>
+      </div>
+
+      ${
+        all.filter(r => r.o_q15)
+          .slice(-5)
+          .reverse()
+          .map(r => `
+            <div class="fb-item">
+              "${escHtml(r.o_q15)}"
+              <div class="fb-meta">
+                ${r.name || 'Anonymous'} · ${fmtDate(r.ts)}
+              </div>
+            </div>
+          `).join('')
+        || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'
+      }
+    </div>
+
+  </div>
+</div>
     <div style="margin-bottom:2rem">
       <div class="dash-section-title">All Responses (${n})</div>
       <div class="resp-table-wrap">
@@ -1325,19 +1490,21 @@ function renderDashboardData(all) {
           <thead><tr>
             <th>#</th><th>Timestamp</th><th>Name</th><th>Employee ID</th><th>Role</th>
             <th>Department</th><th>Date of Joining</th><th>Location</th><th>Manager</th>
-            <th>Recruiter</th><th>Source</th>
+            <th>Recruiter</th><th>Onboarding Coordinator</th><th>Source</th>
             <th>Recruiter Contact (avg)</th><th>Job Description (avg)</th>
             <th>Interview Scheduling (avg)</th><th>Panel Experience (avg)</th>
             <th>Offer Briefing & Closer</th><th>Pre-Joining Support (avg)</th>
             <th>Day 1 Reception (avg)</th><th>Orientation Content (avg)</th>
             <th>Workspace Readiness (avg)</th><th>Team Introduction (avg)</th>
-            <th>Overall Rating (avg)</th><th>NPS Score</th><th>NPS Category</th>
-            <th>Best Experience</th><th>Improvement Areas</th><th>Suggestions</th>
+            <th>Overall Rating (avg)</th><th>Recruiting NPS</th><th>Recruiting NPS Category</th><th>Onboarding NPS</th><th>Onboarding NPS Category</th>
+            <th>Improvement Areas</th><th>Suggestions</th>
           </tr></thead>
           <tbody>
             ${all.slice().reverse().map((r,i)=>{
               const npsBadge = r.o_nps>=0?`<span class="badge ${r.o_nps>=9?'g':r.o_nps>=7?'y':'r'}">${r.o_nps}</span>`:'—';
               const npsCatBadge = r.o_nps>=9?`<span class="badge g">Promoter</span>`:r.o_nps>=7?`<span class="badge y">Passive</span>`:r.o_nps>=0?`<span class="badge r">Detractor</span>`:'—';
+              const nps2Badge = r.o_nps2>=0?`<span class="badge ${r.o_nps2>=9?'g':r.o_nps2>=7?'y':'r'}">${r.o_nps2}</span>`:'—';
+              const nps2CatBadge = r.o_nps2>=9?`<span class="badge g">Promoter</span>`:r.o_nps2>=7?`<span class="badge y">Passive</span>`:r.o_nps2>=0?`<span class="badge r">Detractor</span>`:'—';
               return `<tr>
                 <td style="color:var(--muted)">${n-i}</td>
                 <td style="color:var(--muted);font-size:12px">${fmtDate(r.ts)}</td>
@@ -1349,6 +1516,7 @@ function renderDashboardData(all) {
                 <td>${escHtml(r.loc||'—')}</td>
                 <td>${escHtml(r.mgr||'—')}</td>
                 <td>${escHtml(r.recruiter||'—')}</td>
+                <td>${escHtml(r.onboarder||'—')}</td>
                 <td>${escHtml(r.src||'—')}</td>
                 <td>${starSpan(avgArr(r.a_t1))}</td>
                 <td>${starSpan(avgArr(r.a_t2))}</td>
@@ -1363,9 +1531,10 @@ function renderDashboardData(all) {
                 <td>${starSpan(avgArr(r.o_r))}</td>
                 <td>${npsBadge}</td>
                 <td>${npsCatBadge}</td>
-                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q19||'—')}</td>
-                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q20||'—')}</td>
-                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q21||'—')}</td>
+                <td>${nps2Badge}</td>
+                <td>${nps2CatBadge}</td>
+                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q14||'—')}</td>
+                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q15||'—')}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1388,6 +1557,13 @@ function renderDashboardData(all) {
       locEl.innerHTML = `<option value="all">All Locations</option>` +
         window._allLocations.map(l =>
           `<option value="${l}"${activeLocFilter === l ? ' selected' : ''}>${l}</option>`
+        ).join('');
+    }
+    const obEl = document.getElementById('onboarder-filter');
+    if (obEl && window._allOnboarders && window._allOnboarders.length) {
+      obEl.innerHTML = `<option value="all">All Onboarders</option>` +
+        window._allOnboarders.map(o =>
+          `<option value="${o}"${activeOnboarderFilter === o ? ' selected' : ''}>${o}</option>`
         ).join('');
     }
   }, 50);
@@ -1445,6 +1621,31 @@ function renderDashboardData(all) {
     });
     activeCharts.push(npsChart);
 
+    // Onboarding NPS donut
+    const npsChart2 = new Chart(document.getElementById('ch-nps2'), {
+      type:'doughnut',
+      data:{
+        labels:['Promoters (9–10)','Passives (7–8)','Detractors (0–6)'],
+        datasets:[{data:[npsGroups2.Promoters,npsGroups2.Passives,npsGroups2.Detractors],backgroundColor:['#4ade80','#fb923c','#f87171'],borderWidth:0}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{padding:12,font:{size:11}}},
+          datalabels:{
+            color:'#fff',
+            font:{weight:'700',size:13},
+            formatter:(v,ctx) => {
+              const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+              return v > 0 ? `${v}\n(${Math.round(v/total*100)}%)` : '';
+            }
+          }
+        }
+      },
+      plugins:[ChartDataLabels]
+    });
+    activeCharts.push(npsChart2);
+
     // Source pie
     const srcChart = new Chart(document.getElementById('ch-src'), {
       type:'doughnut',
@@ -1469,6 +1670,37 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(srcChart);
+
+    // Location eNPS grouped bar chart
+    const locEnpsLabels = locationStats.map(s => s.loc);
+    const locEnpsChart = new Chart(document.getElementById('ch-loc-enps'), {
+      type:'bar',
+      data:{
+        labels: locEnpsLabels,
+        datasets:[
+          {label:'Recruiting eNPS', data: locationStats.map(s => s.enps ?? 0), backgroundColor:'#152d4a', borderRadius:5},
+          {label:'Onboarding eNPS', data: locationStats.map(s => s.enps2 ?? 0), backgroundColor:'#c9581e', borderRadius:5}
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        layout:{padding:{top:24}},
+        plugins:{
+          legend:{position:'bottom',labels:{padding:12,font:{size:11}}},
+          datalabels:{
+            anchor:'end', align:'end', color:'var(--text)',
+            font:{weight:'700',size:11},
+            formatter: v => v
+          }
+        },
+        scales:{
+          x:{grid:{display:false}, ticks:{font:{size:11}}},
+          y:{grid:{color:'rgba(0,0,0,0.06)'}, ticks:{font:{size:11}}, suggestedMin:-100, suggestedMax:100}
+        }
+      },
+      plugins:[ChartDataLabels]
+    });
+    activeCharts.push(locEnpsChart);
 
     // Interview rounds bar
     const rndChart = new Chart(document.getElementById('ch-rnd'), {
@@ -1551,6 +1783,7 @@ function exportToExcel() {
       'Manager':            r.mgr || '—',
       'Source':             r.src || '—',
       'Recruiter':          r.recruiter || '—',
+      'Onboarding Coordinator': r.onboarder || '—',
       // Section averages
       'Recruiter Contact (avg)':    +avgArr(r.a_t1).toFixed(2),
       'Job Description (avg)':      +avgArr(r.a_t2).toFixed(2),
@@ -1563,12 +1796,14 @@ function exportToExcel() {
       'Workspace Readiness (avg)':  +avgArr(r.g_t11).toFixed(2),
       'Team Introduction (avg)':    +avgArr(r.g_t12).toFixed(2),
       'Overall Rating (avg)':       +avgArr(r.o_r).toFixed(2),
-      'NPS Score':                  r.o_nps >= 0 ? r.o_nps : '—',
-      'NPS Category':               r.o_nps >= 9 ? 'Promoter' : r.o_nps >= 7 ? 'Passive' : r.o_nps >= 0 ? 'Detractor' : '—',
+      'Recruiting NPS Score':        r.o_nps >= 0 ? r.o_nps : '—',
+      'Recruiting NPS Category':      r.o_nps >= 9 ? 'Promoter' : r.o_nps >= 7 ? 'Passive' : r.o_nps >= 0 ? 'Detractor' : '—',
+      'Onboarding NPS Score':          r.o_nps2 >= 0 ? r.o_nps2 : '—',
+      'Onboarding NPS Category':       r.o_nps2 >= 9 ? 'Promoter' : r.o_nps2 >= 7 ? 'Passive' : r.o_nps2 >= 0 ? 'Detractor' : '—',
       // Open feedback
-      'Best Experience':            r.o_q19 || '',
-      'Improvement Areas':          r.o_q20 || '',
-      'Suggestions':                r.o_q21 || '',
+     // 'Best Experience':            r.o_q19 || '',
+      'Improvement Areas':          r.o_q14 || '',
+      'Suggestions':                r.o_q15 || '',
     }));
 
     const ws1 = XLSX.utils.json_to_sheet(responseRows);
@@ -1596,7 +1831,8 @@ function exportToExcel() {
       { 'Metric': 'Promoters',             'Value': promoters },
       { 'Metric': 'Passives',              'Value': passives },
       { 'Metric': 'Detractors',            'Value': detractors },
-      { 'Metric': 'Promoter Rate (%)',     'Value': npsValid.length ? +(promoters / npsValid.length * 100).toFixed(1) : 0 },
+      { 'Metric': 'Recruiter Promoter Rate (%)',   'Value': npsValid.length ? +(promoters / npsValid.length * 100).toFixed(1) : 0 },
+      { 'Metric': 'Onboarding Promoter Rate (%)',  'Value': globalAllData.filter(r=>r.o_nps2>=0).length ? +(globalAllData.filter(r=>r.o_nps2>=9).length / globalAllData.filter(r=>r.o_nps2>=0).length * 100).toFixed(1) : 0 },
       {},
       { 'Metric': 'Section',               'Value': 'Avg Rating' },
       { 'Metric': 'Recruiter Contact',     'Value': +avg(globalAllData.map(r => avgArr(r.a_t1))).toFixed(2) },
