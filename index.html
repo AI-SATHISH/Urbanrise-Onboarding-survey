@@ -366,6 +366,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 // ═══════════ STATE ═══════════
 const ADMIN_PW = 'Urban@2026';
 const STORE_KEY = 'ur_responses_v2';
+const DRAFT_KEY = 'ur_draft_v1';
 let currentStep = 0;
 const TOTAL_STEPS = 7;
 let response = {};
@@ -396,8 +397,21 @@ async function checkAdmin() {
 }
 
 function gotoSurvey() {
-  currentStep = 0;
-  response = initResponse();
+  const draft = loadDraft();
+  if (draft && draft.data) {
+    const resume = confirm('We found a survey you started earlier. Continue where you left off?');
+    if (resume) {
+      response = draft.data;
+      currentStep = draft.step || 0;
+    } else {
+      clearDraft();
+      currentStep = 0;
+      response = initResponse();
+    }
+  } else {
+    currentStep = 0;
+    response = initResponse();
+  }
   renderStep();
   showScreen('s-survey');
 }
@@ -412,6 +426,32 @@ function saveResponse(r) {
   all.push(r);
   localStorage.setItem(STORE_KEY, JSON.stringify(all));
 }
+
+// ── Draft autosave: lets someone resume after closing the browser/system ──
+function saveDraft() {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ step: currentStep, data: response }));
+  } catch (e) { console.warn('Could not save draft:', e); }
+}
+function loadDraft() {
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY)); }
+  catch { return null; }
+}
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
+}
+// Any click, typed character, or dropdown change while the survey is open
+// triggers a debounced save, so progress is captured automatically.
+let _draftTimer = null;
+function scheduleDraftSave() {
+  const surveyScreen = document.getElementById('s-survey');
+  if (!surveyScreen || !surveyScreen.classList.contains('active')) return;
+  clearTimeout(_draftTimer);
+  _draftTimer = setTimeout(saveDraft, 400);
+}
+document.addEventListener('click', scheduleDraftSave);
+document.addEventListener('input', scheduleDraftSave);
+document.addEventListener('change', scheduleDraftSave);
 
 // ═══════════ RESPONSE INIT ═══════════
 function initResponse() {
@@ -1007,11 +1047,11 @@ function markValidationErrors(errors) {
 function validateStep(step) { return markValidationErrors(getStepValidationErrors(step)); }
 function nextStep() {
   if (!validateStep(currentStep)) return;
-  if (currentStep < TOTAL_STEPS - 1) { currentStep++; renderStep(); }
+  if (currentStep < TOTAL_STEPS - 1) { currentStep++; renderStep(); saveDraft(); }
 }
 function prevStep() {
   clearValidationState();
-  if (currentStep > 0) { currentStep--; renderStep(); }
+  if (currentStep > 0) { currentStep--; renderStep(); saveDraft(); }
 }
 async function submitSurvey() {
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
@@ -1029,6 +1069,7 @@ async function submitSurvey() {
       body: formData
     });
     
+    clearDraft();
     showScreen('s-thankyou');
   } catch (error) {
     console.error('Submission failed:', error);
