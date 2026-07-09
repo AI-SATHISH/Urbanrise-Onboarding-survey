@@ -414,16 +414,32 @@ function showAdminLogin() {
 
 async function checkAdmin() {
   const pw = document.getElementById('admin-pw').value;
-  if (pw === ADMIN_PW) {
-    showScreen('s-dashboard');
-    await renderDashboard();
-  } else {
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+
+  const submitBtn = document.querySelector('.login-card .btn-primary');
+  submitBtn.textContent = 'Checking…';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${WEB_APP_URL}?action=checkPassword&password=${encodeURIComponent(pw)}`);
+    const result = await res.json();
+
+    if (result.success) {
+      showScreen('s-dashboard');
+      await renderDashboard();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+      document.getElementById('admin-pw').value = '';
+      document.getElementById('admin-pw').focus();
+    }
+  } catch (err) {
+    document.getElementById('login-err').textContent = 'Connection error. Please try again.';
     document.getElementById('login-err').style.display = 'block';
-    document.getElementById('admin-pw').value = '';
-    document.getElementById('admin-pw').focus();
+  } finally {
+    submitBtn.textContent = 'Access Dashboard →';
+    submitBtn.disabled = false;
   }
 }
-
 function gotoSurvey() {
   const draft = loadDraft();
   if (draft && draft.data) {
