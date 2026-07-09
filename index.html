@@ -385,7 +385,7 @@ function showAdminLogin() {
 
 async function checkAdmin() {
   const pw = document.getElementById('admin-pw').value;
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw1ZiWYq6hgbQ7R89kNPGDb45F9XkutAnKKz4yHoMozTeVcKqDSvLZALS-npYMed2yrcA/exec';
 
   const submitBtn = document.querySelector('.login-card .btn-primary');
   submitBtn.textContent = 'Checking…';
@@ -1070,7 +1070,7 @@ function prevStep() {
   if (currentStep > 0) { currentStep--; renderStep(); saveDraft(); }
 }
 async function submitSurvey() {
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
 
   // Save locally first so the dashboard always has the full response
   saveResponse(response);
@@ -1126,7 +1126,7 @@ async function renderDashboard() {
   const body = document.getElementById('dash-body');
   body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Loading analytics…</div>';
 
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
 
   let all = [];
   try {
