@@ -364,35 +364,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 
 <script>
 // ═══════════ STATE ═══════════
-//const ADMIN_PW = 'Urban@2026';
-  async function checkAdmin() {
-  const pw = document.getElementById('admin-pw').value;
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMB2PTQped0n4PoHke9yi3jpZHLWRPQVgMlwfZwAu1Wbes4EXT38QJymt1T-sH8YxFPg/exec';
-
-  const submitBtn = document.querySelector('.login-card .btn-primary');
-  submitBtn.textContent = 'Checking…';
-  submitBtn.disabled = true;
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?action=checkPassword&password=${encodeURIComponent(pw)}`);
-    const result = await res.json();
-
-    if (result.success) {
-      showScreen('s-dashboard');
-      await renderDashboard();
-    } else {
-      document.getElementById('login-err').style.display = 'block';
-      document.getElementById('admin-pw').value = '';
-      document.getElementById('admin-pw').focus();
-    }
-  } catch (err) {
-    document.getElementById('login-err').textContent = 'Connection error. Please try again.';
-    document.getElementById('login-err').style.display = 'block';
-  } finally {
-    submitBtn.textContent = 'Access Dashboard →';
-    submitBtn.disabled = false;
-  }
-}
 const STORE_KEY = 'ur_responses_v2';
 const DRAFT_KEY = 'ur_draft_v1';
 let currentStep = 0;
@@ -440,6 +411,7 @@ async function checkAdmin() {
     submitBtn.disabled = false;
   }
 }
+
 function gotoSurvey() {
   const draft = loadDraft();
   if (draft && draft.data) {
@@ -1122,7 +1094,6 @@ async function submitSurvey() {
 }
 
 // ═══════════ DASHBOARD ═══════════
-// Add this at the very top of your script, outside any functions
 let globalData = [];
 let globalAllData = []; // stores last fetched dashboard data for Excel export
 window._activeRecruiterFilter = 'all';
@@ -1130,33 +1101,6 @@ window._allRecruiters = [];
 window._activeOnboarderFilter = 'all';
 window._allOnboarders = [];
 
-// async function renderDashboard() {
-//   //localStorage.removeItem('ur_responses_v2');
-//     activeCharts.forEach(c => c.destroy());
-//     activeCharts = [];
-    
-//     const body = document.getElementById('dash-body');
-//     body.innerHTML = '<div>Loading analytics...</div>';
-
-//     // 1. Declare 'all' here so it is accessible in both try and catch
-//     let all = []; 
-
-//    try {
-//     // const response = await fetch('https://docs.google.com/spreadsheets/d/1voNp_maJ833n1cmyqD_mmoDHNx6inPw_NUNpzqxMcIU/edit?pli=1&gid=1583373108#gid=1583373108');
-//     const response = await fetch('https://docs.google.com/spreadsheets/d/1voNp_maJ833n1cmyqD_mmoDHNx6inPw_NUNpzqxMcIU/export?format=csv&gid=1583373108');
-//     //const data = await response.json();
-//     const data = await response.text();
-//     console.log("Raw CSV Data:", data); // Check F12 Console!
-
-//     all = csvToJSON(data);
-//     console.log("Parsed Data:", all); // Check F12 Console!
-
-//     if (all.length === 0) throw new Error('CSV is empty or could not be parsed');
-//     body.innerHTML = ''; 
-// } catch (error) {
-//     console.error("Dashboard Error:", error);
-//     body.innerHTML = `<div class="no-data"><h3>Error loading data</h3><p>${error.message}</p></div>`;
-// } 
 // Normalises a field that may be:
 //   - already a JS array     → [4,3,3,4]
 //   - a JSON-style string    → "[4,3,3,4]"
@@ -1902,7 +1846,6 @@ function exportToExcel() {
       'Onboarding NPS Score':          r.o_nps2 >= 0 ? r.o_nps2 : '—',
       'Onboarding NPS Category':       r.o_nps2 >= 9 ? 'Promoter' : r.o_nps2 >= 7 ? 'Passive' : r.o_nps2 >= 0 ? 'Detractor' : '—',
       // Open feedback
-     // 'Best Experience':            r.o_q19 || '',
       'Improvement Areas':          r.o_q14 || '',
       'Suggestions':                r.o_q15 || '',
     }));
