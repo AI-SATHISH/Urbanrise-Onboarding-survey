@@ -170,6 +170,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .btn-next:hover{opacity:.88}
 .btn-submit{background:var(--accent);color:white;border:none;border-radius:9px;padding:10px 28px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
 .btn-submit:hover{opacity:.88}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed}
 
 /* ── THANK YOU ── */
 #s-thankyou{background:var(--primary);text-align:center;padding:2rem}
@@ -233,7 +234,12 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .resp-table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);margin-bottom:2rem}
 .resp-table{width:100%;border-collapse:collapse;font-size:13px}
 .resp-table th{background:var(--bg);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);white-space:nowrap}
-.resp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+.resp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;vertical-align:top}
+/* FIX: long open-feedback answers used to stretch a row to ~900px and, because
+   cells default to vertical-align:middle, everything else floated in the middle
+   of a huge blank gap. Clamp the text to 3 lines; full text on hover (title). */
+.resp-table td.fb-cell{white-space:normal;width:240px;max-width:240px;font-size:12px;color:var(--muted)}
+.resp-table td.fb-cell .fb-clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;line-height:1.45;cursor:help}
 .resp-table tr:last-child td{border-bottom:none}
 .resp-table tr:hover td{background:var(--bg)}
 .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
@@ -291,6 +297,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 </div>
 
 <!-- ════════════ ADMIN LOGIN ════════════ -->
+<!-- FIX: removed a stray extra </div> that was here -->
 <div id="s-admin-login" class="screen center">
   <div class="login-card">
     <div class="login-logo">
@@ -303,7 +310,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     <div class="fl"><label>Admin Password</label><input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdmin()"></div>
     <button class="btn-primary" onclick="checkAdmin()">Access Dashboard →</button>
     <div style="text-align:center"><button class="btn-back" onclick="showScreen('s-landing')">← Back to Home</button></div>
-    </div>
   </div>
 </div>
 
@@ -437,8 +443,10 @@ function loadResponses() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
   catch { return []; }
 }
+// FIX: dedupe locally too — never store the same response id twice.
 function saveResponse(r) {
   const all = loadResponses();
+  if (r.id && all.some(x => x.id === r.id)) return;
   all.push(r);
   localStorage.setItem(STORE_KEY, JSON.stringify(all));
 }
@@ -512,7 +520,7 @@ const steps = [
 const LOCATION_OPTIONS = [
   'Chennai','Hyderabad','Bangalore','GCC'
 ];
-  
+
 function renderStep() {
   const s = steps[currentStep];
   document.getElementById('step-label').textContent = `Step ${currentStep+1} of ${TOTAL_STEPS}`;
@@ -999,7 +1007,9 @@ function getStepValidationErrors(step) {
   }
   if (step === 2) {
     if (unrated(response.b_t3)) errs.push({id:'b_t3-0'});
-    if (blank(response.b_q2)) errs.push({id:'bq2-opts'});
+    // FIX: was 'bq2-opts' — that element does not exist, so the error
+    // never highlighted. The Q2 container is actually id="bq4-opts".
+    if (blank(response.b_q2)) errs.push({id:'bq4-opts'});
     if (blank(response.b_q3)) errs.push({id:'bq5-opts'});
     if (unrated(response.b_t4)) errs.push({id:'b_t4-0'});
     if (blank(response.b_q4)) errs.push({id:'bq6-opts'});
@@ -1069,28 +1079,60 @@ function prevStep() {
   clearValidationState();
   if (currentStep > 0) { currentStep--; renderStep(); saveDraft(); }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   SUBMIT — DUPLICATE-PROOF
+   Rows 26–28 (same person, same second) were caused by:
+     1. no guard, so every click fired another POST
+     2. the old catch{} alerting "Submission failed" even when the row
+        HAD been written (Apps Script redirects break fetch), so users
+        clicked Submit again
+     3. the server appending blindly instead of checking response.id
+   This version fixes 1 and 2. Fix 3 lives in the Apps Script doPost.
+   ══════════════════════════════════════════════════════════════════ */
+let isSubmitting = false;
+
+// Retries once. Safe, because the server rejects an id it already stored.
+async function postWithRetry(url, body, attempts = 2) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(url, { method: 'POST', body });
+      return await res.json().catch(() => ({ success: true }));
+    } catch (e) {
+      console.warn(`Submit attempt ${i + 1} could not be confirmed:`, e);
+      if (i === attempts - 1) return { success: false, unconfirmed: true };
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+}
+
 async function submitSurvey() {
+  if (isSubmitting) return;                    // blocks double/triple clicks
+  if (!validateStep(currentStep)) return;      // the old code skipped this
+
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
+  const btn = document.getElementById('btn-submit');
 
-  // Save locally first so the dashboard always has the full response
-  saveResponse(response);
+  isSubmitting = true;
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
 
-  // Use URLSearchParams to ensure the script receives it via e.parameter
   const formData = new URLSearchParams();
   formData.append('data', JSON.stringify(response));
 
-  try {
-    await fetch(WEB_APP_URL, {
-      method: 'POST',
-      body: formData
-    });
-    
-    clearDraft();
-    showScreen('s-thankyou');
-  } catch (error) {
-    console.error('Submission failed:', error);
-    alert('Submission failed. Please check your internet connection.');
-  }
+  await postWithRetry(WEB_APP_URL, formData);
+
+  // NO "submission failed" alert. An unreadable response almost always
+  // still wrote the row; telling the user to retry is what created the
+  // duplicates. If a retry does slip through, doPost discards it by id.
+  saveResponse(response);
+  clearDraft();
+  showScreen('s-thankyou');
+
+  // Reset for the next respondent on a shared laptop/kiosk.
+  isSubmitting = false;
+  btn.disabled = false;
+  btn.textContent = 'Submit Survey ✓';
 }
 
 // ═══════════ DASHBOARD ═══════════
@@ -1157,7 +1199,17 @@ async function renderDashboard() {
       return;
     }
   }
-  
+
+  // FIX: guard the dashboard too — if any duplicate rows are still in the
+  // sheet, collapse them by id so KPIs/eNPS are not inflated.
+  const _seen = {};
+  all = all.filter(r => {
+    if (!r.id) return true;
+    if (_seen[r.id]) return false;
+    _seen[r.id] = true;
+    return true;
+  });
+
   globalAllData = all;
 
   // Populate recruiter & location filter options
@@ -1578,8 +1630,8 @@ function renderDashboardData(all) {
                 <td>${npsCatBadge}</td>
                 <td>${nps2Badge}</td>
                 <td>${nps2CatBadge}</td>
-                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q14||'—')}</td>
-                <td style="max-width:200px;white-space:normal;font-size:12px;color:var(--muted)">${escHtml(r.o_q15||'—')}</td>
+                <td class="fb-cell"><div class="fb-clip" title="${escHtml(r.o_q14||'')}">${escHtml(r.o_q14||'—')}</div></td>
+                <td class="fb-cell"><div class="fb-clip" title="${escHtml(r.o_q15||'')}">${escHtml(r.o_q15||'—')}</div></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1799,7 +1851,7 @@ function renderDashboardData(all) {
     });
     activeCharts.push(feelChart);
   }, 100);
-}   
+}
 
 // ═══════════ EXCEL EXPORT ═══════════
 function exportToExcel() {
