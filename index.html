@@ -772,7 +772,7 @@ const stepHTML = [
       <div class="q-block">
         <div class="q-label"><strong>Q11.</strong> Which topics needed more depth or were missing? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="fq14-checks">
-          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','OB(ERP) & IT','Medical Insurance'].map(o=>`<div class="chk${response.f_q11.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q11">${o}</div>`).join('')}
+          ${['Company Vision & Values','HR Policies','Benefits & Compensation','Organisational Structure','Project Overview','Code of Conduct / POSH','OB(ERP) & IT','Medical Insurance','None of the Above'].map(o=>`<div class="chk${response.f_q11.includes(o)?' sel':''}" data-val="${o}" data-arr="f_q11">${o}</div>`).join('')}
         </div>
       </div>
     </div>
@@ -793,7 +793,7 @@ const stepHTML = [
       <div class="q-block" style="margin-top:1.25rem">
         <div class="q-label"><strong>Q12.</strong> Which of the following was NOT ready on your Day 1? <span style="color:var(--muted);font-size:12px">(select all that apply)</span> <span class="req">*</span></div>
         <div class="checks" id="gq16-checks">
-          ${['Laptop / Desktop','Email Access','System Login Credentials','Access Card / ID Badge','Seating / Workstation','Software Tools','OB Login','Everything was ready','Sim Card'].map(o=>`<div class="chk${response.g_q12.includes(o)?' sel':''}" data-val="${o}" data-arr="g_q12">${o}</div>`).join('')}
+          ${['All Provided on Day 1','Laptop / Desktop','Email Access','System Login Credentials','Access Card / ID Badge','Seating / Workstation','Software Tools','OB Login','Sim Card'].map(o=>`<div class="chk${response.g_q12.includes(o)?' sel':''}" data-val="${o}" data-arr="g_q12">${o}</div>`).join('')}
         </div>
       </div>
     </div>
