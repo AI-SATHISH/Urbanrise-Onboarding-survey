@@ -297,7 +297,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 </div>
 
 <!-- ════════════ ADMIN LOGIN ════════════ -->
-<!-- FIX: removed a stray extra </div> that was here -->
 <div id="s-admin-login" class="screen center">
   <div class="login-card">
     <div class="login-logo">
@@ -376,6 +375,29 @@ let currentStep = 0;
 const TOTAL_STEPS = 7;
 let response = {};
 let activeCharts = [];
+
+// ─── Name → Location map (used by the dashboard to derive location from names) ───
+// Recruiting visuals use the recruiter's city; onboarding visuals use the onboarding
+// coordinator's city. Keep this in sync with the backend map. Spaces are ignored so
+// "Komal  Dev G D" still resolves.
+const NAME_LOCATION = {
+  'Anurag Kumar Singh':'Hyderabad',
+  'Archana Gupta':'Hyderabad',
+  'Devika Singh':'Bangalore',
+  'Hari Krishna Maddugalla':'Hyderabad',
+  'Kamal Nath J':'Chennai',
+  'Komal Dev G D':'Chennai',
+  'Natasha Pramod Patkar':'Hyderabad',
+  'Rashika Poovaiah':'Bangalore',
+  'Sangeetha Devi Velkumar':'Chennai',
+  'Sanjay V':'Chennai',
+  'Sejal Sanjay Choudhary':'Bangalore',
+  'Soma Mohanty':'Bangalore',
+  'Srujan Devabhaktuni':'Hyderabad',
+  'Syed Mubashir Hussain':'Hyderabad',
+  'Varun Kumar Chakka':'Hyderabad'
+};
+function locFor(name){ return NAME_LOCATION[String(name||'').replace(/\s+/g,' ').trim()] || ''; }
 
 // ═══════════ NAVIGATION ═══════════
 function showScreen(id) {
@@ -516,10 +538,12 @@ const steps = [
   {badge:'Part F & G', title:'Orientation & Workspace Readiness', desc:'Rate the orientation program quality and readiness of your workspace and tools.'},
   {badge:'Overall', title:'Overall Satisfaction & Feedback', desc:'Share your overall ratings and open thoughts — your words directly shape how we improve.'},
 ];
-// Location options list
-const LOCATION_OPTIONS = [
-  'Chennai','Hyderabad','Bangalore','GCC'
-];
+
+// ─── Location ───
+// Location is NOT collected in the form and is NOT derived on the front end.
+// The backend (Google Apps Script doPost) fills the `loc` column from the selected
+// recruiter (fallback: onboarding coordinator). The HR dashboard then reads that
+// `loc` column as its own separate dimension. See the doPost snippet shared alongside.
 
 function renderStep() {
   const s = steps[currentStep];
@@ -563,18 +587,13 @@ const stepHTML = [
       <div class="g2" style="margin-bottom:12px">
         <div class="q-block"><div class="q-label">Date of Joining <span class="req">*</span></div>
           <input class="q-input" type="date" id="i-doj" value="${response.doj}"></div>
-         <div class="q-block"><div class="q-label">Location <span class="req">*</span></div>
-          <select class="q-input" id="i-loc">
-            <option value="">— Select Location —</option>
-            ${LOCATION_OPTIONS.map(l=>`<option value="${l}"${response.loc===l?' selected':''}>${l}</option>`).join('')}
-          </select></div>
+        <div class="q-block"><div class="q-label">Reporting Manager Name <span class="req">*</span></div>
+          <input class="q-input" id="i-mgr" placeholder="Manager name" value="${response.mgr}"></div>
       </div>
-      <div class="q-block"><div class="q-label">Reporting Manager Name <span class="req">*</span></div>
-        <input class="q-input" id="i-mgr" placeholder="Manager name" value="${response.mgr}"></div>
         <div class="q-block" style="margin-top:12px"><div class="q-label">Recruiter Name <span class="req">*</span></div>
         <select class="q-input" id="i-recruiter">
           <option value="">— Select Recruiter —</option>
-          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Bharani Rayala','Sejal Sanjay Choudhary','Srujan Devabhaktuni','Devika Singh','Syed Mubashir Hussain'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
+          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Sejal Sanjay Choudhary','Srujan Devabhaktuni','Devika Singh','Syed Mubashir Hussain'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
     <div class="q-block" style="margin-top:12px"><div class="q-label">Onboarding Coordinator Name <span class="req">*</span></div>
@@ -941,21 +960,20 @@ function bindStep() {
     });
   });
 
-  // Textareas / inputs
-  ['name','empId','role','dept','doj','loc','mgr'].forEach(f => {
-    const map = {name:'i-name',empId:'i-empid',role:'i-role',dept:'i-dept',doj:'i-doj',loc:'i-loc',mgr:'i-mgr'};
+  // Textareas / inputs (Location is NOT here — it is auto-derived, never typed)
+  ['name','empId','role','dept','doj','mgr'].forEach(f => {
+    const map = {name:'i-name',empId:'i-empid',role:'i-role',dept:'i-dept',doj:'i-doj',mgr:'i-mgr'};
     const el = document.getElementById(map[f]);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
-  // Location select (dropdown)
-  const locEl = document.getElementById('i-loc');
-  if (locEl) locEl.addEventListener('change', () => response.loc = locEl.value);
-  // Recruiter select
+
+  // Recruiter / Onboarding Coordinator — collected here and sent to the backend,
+  // which derives the candidate's location from these and writes the `loc` column.
   const recEl = document.getElementById('i-recruiter');
-  if (recEl) recEl.addEventListener('change', () => response.recruiter = recEl.value);
-  // Onboarder select
+  if (recEl) recEl.addEventListener('change', () => { response.recruiter = recEl.value; });
   const obEl = document.getElementById('i-onboarder');
-  if (obEl) obEl.addEventListener('change', () => response.onboarder = obEl.value);
+  if (obEl) obEl.addEventListener('change', () => { response.onboarder = obEl.value; });
+
   // Textareas
   ['o_q14','o_q15'].forEach(f => {
     const el = document.getElementById('i-'+f);
@@ -994,7 +1012,6 @@ function getStepValidationErrors(step) {
     if (blank(response.role)) errs.push({id:'i-role'});
     if (blank(response.dept)) errs.push({id:'i-dept'});
     if (blank(response.doj)) errs.push({id:'i-doj'});
-    if (blank(response.loc)) errs.push({id:'i-loc'});
     if (blank(response.mgr)) errs.push({id:'i-mgr'});
     if (blank(response.recruiter)) errs.push({id:'i-recruiter'});
     if (blank(response.onboarder)) errs.push({id:'i-onboarder'});
@@ -1185,9 +1202,11 @@ async function renderDashboard() {
       arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
       obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
       obj.o_nps2 = obj.o_nps2 !== '' && obj.o_nps2 !== undefined ? Number(obj.o_nps2) : -1;
-      // ── Clean " - " from name fields ──
+      // ── Clean " - " from name fields (coerce to string first: some cells
+      //    (e.g. an all-numeric name/manager) come back as numbers, which have no .replace) ──
       ['name','mgr','recruiter','onboarder'].forEach(f => {
-        if (obj[f]) obj[f] = obj[f].replace(/\s*-\s*/g, ' ').trim();
+        if (obj[f] !== null && obj[f] !== undefined && obj[f] !== '')
+          obj[f] = String(obj[f]).replace(/\s*-\s*/g, ' ').trim();
       });
       return obj;
     });
@@ -1211,6 +1230,16 @@ async function renderDashboard() {
   });
 
   globalAllData = all;
+
+  // Derive location from names: recruiting side uses the recruiter's city,
+  // onboarding side uses the onboarding coordinator's city. `loc` (the generic
+  // candidate location used by the filter/table/export) defaults to the recruiter's
+  // city, but keeps any real value the backend already provided.
+  all.forEach(r => {
+    r.recLoc = locFor(r.recruiter) || 'Not Specified';
+    r.onbLoc = locFor(r.onboarder) || 'Not Specified';
+    if (!r.loc) r.loc = r.recLoc;
+  });
 
   // Populate recruiter & location filter options
   window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
@@ -1251,11 +1280,11 @@ function renderDashboardData(all) {
   const detractors = all.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
   const npsValid = globalAllData.filter(r => r.o_nps >= 0);
   const npsValidCount = all.filter(r=>r.o_nps>=0).length;
-  const npsScore = Math.round(((promoters - detractors) / Math.max(npsValidCount,1)) * 100);
+  const npsScore = enpsScore(all, 'o_nps') ?? 0;
   const promoters2 = all.filter(r => r.o_nps2 >= 9).length;
   const detractors2 = all.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
   const npsValidCount2 = all.filter(r=>r.o_nps2>=0).length;
-  const npsScore2 = Math.round(((promoters2 - detractors2) / Math.max(npsValidCount2,1)) * 100);
+  const npsScore2 = enpsScore(all, 'o_nps2') ?? 0;
   const npsGroups2 = {Promoters: promoters2, Passives: all.filter(r=>r.o_nps2>=7&&r.o_nps2<=8).length, Detractors: detractors2};
 
   // Section averages
@@ -1273,6 +1302,7 @@ function renderDashboardData(all) {
   ];
 
   const srcCount = countBy(all, r => r.src || 'Not specified');
+  const locCount = countBy(all, r => r.recLoc || 'Not Specified');
   const rndCount = countBy(all, r => r.b_q2 || 'Not specified');
   const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
   const feelCount = countBy(all, r => r.d_q8 || 'Not specified');
@@ -1284,7 +1314,7 @@ function renderDashboardData(all) {
     const prom  = valid.filter(r => r.o_nps2 >= 9).length;
     const pass  = valid.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
     const det   = valid.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
-    const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const enps  = enpsScore(rows, 'o_nps2');
     const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
     const avgOnb    = avg(rows.map(r => avg([avgArr(r.d_t8), avgArr(r.f_t9), avgArr(r.g_t11), avgArr(r.g_t12)].filter(v => v > 0))));
     const avgNPSo   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
@@ -1292,21 +1322,24 @@ function renderDashboardData(all) {
     const avgAlignO = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
     return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, avgOv, avgOnb, avgNPSo, avgConfo, avgAlignO };
   });
-  const locationNames = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
+  const locationNames = [...new Set(all.flatMap(r => [r.recLoc || 'Not Specified', r.onbLoc || 'Not Specified']))].sort();
   const locationStats = locationNames.map(loc => {
-    const rows   = all.filter(r => (r.loc || 'Not Specified') === loc);
-    const valid  = rows.filter(r => r.o_nps >= 0);
+    // Recruiting side grouped by the recruiter's city; onboarding side by the onboarder's city.
+    const recRows = all.filter(r => (r.recLoc || 'Not Specified') === loc);
+    const onbRows = all.filter(r => (r.onbLoc || 'Not Specified') === loc);
+    const valid  = recRows.filter(r => r.o_nps >= 0);
     const prom   = valid.filter(r => r.o_nps >= 9).length;
     const pass   = valid.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
     const det    = valid.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
-    const enps   = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
-    const valid2 = rows.filter(r => r.o_nps2 >= 0);
+    const enps   = enpsScore(recRows, 'o_nps');
+    const valid2 = onbRows.filter(r => r.o_nps2 >= 0);
     const prom2  = valid2.filter(r => r.o_nps2 >= 9).length;
     const pass2  = valid2.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
     const det2   = valid2.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
-    const enps2  = valid2.length ? Math.round(((prom2 - det2) / valid2.length) * 100) : null;
-    const avgOv  = avg(rows.map(r => avgArr(r.o_r)));
-    return { loc, total: rows.length, valid: valid.length, prom, pass, det, enps, promPct: valid.length ? Math.round((prom/valid.length)*100) : 0, valid2: valid2.length, prom2, pass2, det2, enps2, promPct2: valid2.length ? Math.round((prom2/valid2.length)*100) : 0, avgOv };
+    const enps2  = enpsScore(onbRows, 'o_nps2');
+    const avgOv  = avg(recRows.map(r => avgArr(r.o_r)));
+    const total  = new Set([...recRows, ...onbRows]).size; // distinct responses touching this city
+    return { loc, total, valid: valid.length, prom, pass, det, enps, promPct: valid.length ? Math.round((prom/valid.length)*100) : 0, valid2: valid2.length, prom2, pass2, det2, enps2, promPct2: valid2.length ? Math.round((prom2/valid2.length)*100) : 0, avgOv };
   });
   const recruiterNames = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   const recruiterStats = recruiterNames.map(name => {
@@ -1315,12 +1348,12 @@ function renderDashboardData(all) {
     const prom  = valid.filter(r => r.o_nps >= 9).length;
     const pass  = valid.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
     const det   = valid.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
-    const enps  = valid.length ? Math.round(((prom - det) / valid.length) * 100) : null;
+    const enps  = enpsScore(rows, 'o_nps');
     const valid2 = rows.filter(r => r.o_nps2 >= 0);
     const prom2  = valid2.filter(r => r.o_nps2 >= 9).length;
     const pass2  = valid2.filter(r => r.o_nps2 >= 7 && r.o_nps2 <= 8).length;
     const det2   = valid2.filter(r => r.o_nps2 >= 0 && r.o_nps2 <= 6).length;
-    const enps2  = valid2.length ? Math.round(((prom2 - det2) / valid2.length) * 100) : null;
+    const enps2  = enpsScore(rows, 'o_nps2');
     const avgRec    = avg(rows.map(r => avgArr(r.a_t1)));
     const avgOv     = avg(rows.map(r => avgArr(r.o_r)));
     const avgNPSr   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
@@ -1392,15 +1425,20 @@ function renderDashboardData(all) {
         <div class="chart-wrap" style="height:320px"><canvas id="ch-sections"></canvas></div>
       </div>
     </div>
-    <div class="chart-grid" style="margin-bottom:1.75rem">
+    <div class="chart-grid-3" style="margin-bottom:1.75rem">
       <div class="chart-card">
         <div class="chart-title">Source of Application</div>
         <div class="chart-sub">How candidates found Urbanrise</div>
         <div class="chart-wrap" style="height:220px"><canvas id="ch-src"></canvas></div>
       </div>
       <div class="chart-card">
+        <div class="chart-title">Responses by Location</div>
+        <div class="chart-sub">Share of responses per city (by recruiter location)</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-loc-pie"></canvas></div>
+      </div>
+      <div class="chart-card">
         <div class="chart-title">Location-wise eNPS Distribution</div>
-        <div class="chart-sub">Recruiting vs Onboarding eNPS by city</div>
+        <div class="chart-sub">Recruiting eNPS by recruiter city · Onboarding eNPS by onboarder city</div>
         <div class="chart-wrap" style="height:220px"><canvas id="ch-loc-enps"></canvas></div>
       </div>
     </div>
@@ -1768,6 +1806,31 @@ function renderDashboardData(all) {
     });
     activeCharts.push(srcChart);
 
+    // Responses-by-location donut (location comes from recruiter / onboarder, filled by backend)
+    const locPieChart = new Chart(document.getElementById('ch-loc-pie'), {
+      type:'doughnut',
+      data:{
+        labels:Object.keys(locCount),
+        datasets:[{data:Object.values(locCount),backgroundColor:['#152d4a','#c9581e','#2d7a5f','#4a90d9','#8b5cf6','#e07b3c','#f59e0b'],borderWidth:0}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{padding:12,font:{size:11}}},
+          datalabels:{
+            color:'#fff',
+            font:{weight:'700',size:12},
+            formatter:(v,ctx) => {
+              const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+              return v > 0 ? `${v}\n(${Math.round(v/total*100)}%)` : '';
+            }
+          }
+        }
+      },
+      plugins:[ChartDataLabels]
+    });
+    activeCharts.push(locPieChart);
+
     // Location eNPS grouped bar chart
     const locEnpsLabels = locationStats.map(s => s.loc);
     const locEnpsChart = new Chart(document.getElementById('ch-loc-enps'), {
@@ -1917,7 +1980,7 @@ function exportToExcel() {
     const promoters = globalAllData.filter(r => r.o_nps >= 9).length;
     const passives  = globalAllData.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
     const detractors= globalAllData.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
-    const npsScore  = npsValid.length ? Math.round(((promoters - detractors) / npsValid.length) * 100) : 0;
+    const npsScore  = enpsScore(globalAllData, 'o_nps') ?? 0;
 
     const summaryRows = [
       { 'Metric': 'Total Responses',       'Value': n },
@@ -1967,6 +2030,18 @@ function avg(arr) {
 function avgArr(arr) {
   if (!arr||!arr.length) return 0;
   return avg(arr);
+}
+// Score-weighted eNPS: (Σ promoter scores − Σ detractor scores) expressed as a
+// percentage of the MAXIMUM possible score (responses × 10). This keeps the
+// score-weighting but bounds the result within ±100 (in practice −60…+100).
+// Promoters score 9–10, Detractors 0–6; Passives (7–8) add nothing to the numerator
+// but still count in the total. Returns null when there are no valid responses.
+function enpsScore(rows, field) {
+  const valid = rows.filter(r => r[field] >= 0);
+  if (!valid.length) return null;
+  const promSum = valid.reduce((s,r) => s + (r[field] >= 9 ? r[field] : 0), 0);
+  const detSum  = valid.reduce((s,r) => s + (r[field] <= 6 ? r[field] : 0), 0);
+  return Math.round(((promSum - detSum) / (valid.length * 10)) * 100);
 }
 function countBy(arr, fn) {
   return arr.reduce((acc,r)=>{ const k=fn(r); acc[k]=(acc[k]||0)+1; return acc; },{});
