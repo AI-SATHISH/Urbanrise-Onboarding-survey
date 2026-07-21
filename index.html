@@ -574,13 +574,13 @@ const stepHTML = [
         <div class="q-block" style="margin-top:12px"><div class="q-label">Recruiter Name <span class="req">*</span></div>
         <select class="q-input" id="i-recruiter">
           <option value="">— Select Recruiter —</option>
-          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Bharani Rayala','Sejal Sanjay Choudhary','Srujan Devabhaktuni'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
+          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Bharani Rayala','Sejal Sanjay Choudhary','Srujan Devabhaktuni','Devika Singh','Syed Mubashir Hussain'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
     <div class="q-block" style="margin-top:12px"><div class="q-label">Onboarding Coordinator Name <span class="req">*</span></div>
         <select class="q-input" id="i-onboarder">
           <option value="">— Select Onboarding Coordinator —</option>
-          ${['Kamal Nath J','Natasha Pramod Patkar','Rashika Poovaiah','Sangeetha Devi Velkumar','Sanjay V','Komal  Dev G D'].map(r=>`<option value="${r}"${response.onboarder===r?' selected':''}>${r}</option>`).join('')}
+          ${['Kamal Nath J','Natasha Pramod Patkar','Rashika Poovaiah','Sangeetha Devi Velkumar'].map(r=>`<option value="${r}"${response.onboarder===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
     <div class="section-card">
