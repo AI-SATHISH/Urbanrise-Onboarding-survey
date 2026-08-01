@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg: #f4f1ec;
@@ -27,12 +29,10 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);font-family:var(--font-body);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
 h1,h2,h3,h4{font-family:var(--font-head)}
-
 /* ── LAYOUT ── */
 .screen{display:none;min-height:100vh}
 .screen.active{display:flex}
 .center{align-items:center;justify-content:center;flex-direction:column}
-
 /* ── LANDING ── */
 #s-landing{background:var(--primary);position:relative;overflow:hidden;padding:2rem}
 #s-landing::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%, rgba(201,88,30,0.18) 0%, transparent 60%),radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%)}
@@ -57,7 +57,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .ac-title{font-family:var(--font-head);font-size:16px;font-weight:600;color:white;margin-bottom:4px}
 .ac-desc{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5}
 .land-footer{margin-top:2.5rem;font-size:12px;color:rgba(255,255,255,0.25)}
-
 /* ── ADMIN LOGIN MODAL ── */
 #s-admin-login{background:var(--bg);padding:2rem}
 .login-card{background:var(--card);border-radius:16px;padding:2.5rem 2rem;max-width:400px;width:100%;box-shadow:var(--shadow);border:1px solid var(--border)}
@@ -76,7 +75,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .btn-primary:hover{opacity:0.88}
 .btn-back{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);margin-top:1rem;display:flex;align-items:center;gap:5px}
 .btn-back:hover{color:var(--primary)}
-
 /* ── SURVEY ── */
 #s-survey{background:var(--bg);flex-direction:column;padding:0}
 .survey-header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -98,7 +96,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .q-label strong{font-weight:500}
 .q-block{margin-bottom:1.5rem}
 .q-block:last-child{margin-bottom:0}
-
 /* Rating stars */
 .rating-table{width:100%;border-collapse:collapse}
 .rating-table tr{border-bottom:1px solid var(--border)}
@@ -111,13 +108,11 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .star.on{color:#f59e0b;-webkit-text-stroke:0}
 .star:hover{color:#f59e0b}
 .rating-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px}
-
 /* Radio options */
 .opts{display:flex;flex-wrap:wrap;gap:8px}
 .opt{font-size:13px;cursor:pointer;padding:7px 14px;border:1.5px solid var(--border);border-radius:20px;color:var(--text);transition:all .15s;background:var(--bg);user-select:none;white-space:nowrap}
 .opt:hover{border-color:var(--accent2)}
 .opt.sel{border-color:var(--accent);background:rgba(201,88,30,0.08);color:var(--accent);font-weight:500}
-
 /* Yes/No */
 .yn-grid{display:flex;flex-direction:column;gap:8px}
 .yn-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:9px;gap:12px}
@@ -126,13 +121,11 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .yn-btn{font-size:12px;font-weight:500;padding:5px 14px;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;transition:all .15s;background:var(--card);color:var(--muted)}
 .yn-btn.yes.sel{border-color:var(--green);background:rgba(30,107,74,0.08);color:var(--green)}
 .yn-btn.no.sel{border-color:#dc2626;background:rgba(220,38,38,0.07);color:#dc2626}
-
 /* Multi-select checkboxes */
 .checks{display:flex;flex-wrap:wrap;gap:8px}
 .chk{font-size:13px;cursor:pointer;padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;color:var(--text);transition:all .15s;background:var(--bg);user-select:none}
 .chk:hover{border-color:var(--accent2)}
 .chk.sel{border-color:var(--accent);background:rgba(201,88,30,0.08);color:var(--accent)}
-
 /* NPS */
 .nps-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
 .nps-btn{width:50px;height:50px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-size:15px;font-weight:600;background:var(--bg);color:var(--text);transition:all .15s;font-family:var(--font-head)}
@@ -146,11 +139,9 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .nps-tag.d{background:#fef2f2;color:#b91c1c}
 .nps-tag.p{background:#fff7ed;color:#c2410c}
 .nps-tag.pr{background:#f0fdf4;color:#15803d}
-
 /* Textarea */
 .q-textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--bg);resize:vertical;min-height:90px;outline:none;transition:border-color .2s;line-height:1.6}
 .q-textarea:focus{border-color:var(--primary)}
-
 /* Input */
 .q-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
 .q-input:focus{border-color:var(--primary)}
@@ -158,10 +149,8 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .field-error{border-color:#dc2626 !important;box-shadow:0 0 0 3px rgba(220,38,38,0.08)}
 .group-error{border:1.5px solid rgba(220,38,38,0.35);border-radius:10px;padding:10px}
 .q-label .req{color:#dc2626;font-weight:700;margin-left:4px}
-
 /* Grid inputs */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
 /* Survey footer */
 .survey-footer{background:var(--card);border-top:1px solid var(--border);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;bottom:0}
 .btn-prev{background:none;border:1.5px solid var(--border);border-radius:9px;padding:10px 20px;font-family:var(--font-head);font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
@@ -171,7 +160,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .btn-submit{background:var(--accent);color:white;border:none;border-radius:9px;padding:10px 28px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
 .btn-submit:hover{opacity:.88}
 .btn-submit:disabled{opacity:.6;cursor:not-allowed}
-
 /* ── THANK YOU ── */
 #s-thankyou{background:var(--primary);text-align:center;padding:2rem}
 .ty-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:3rem 2rem;max-width:460px;width:100%}
@@ -181,7 +169,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .ty-btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .ty-btn-sec{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:white;border-radius:9px;padding:10px 20px;font-family:var(--font-head);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
 .ty-btn-sec:hover{background:rgba(255,255,255,0.14)}
-
 /* ── DASHBOARD ── */
 #s-dashboard{background:var(--bg);flex-direction:column;padding:0}
 .dash-header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
@@ -196,20 +183,21 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .btn-export{background:rgba(30,107,74,0.25);border:1px solid rgba(74,222,128,0.35);color:#4ade80;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
 .btn-export:hover{background:rgba(30,107,74,0.4);border-color:#4ade80}
 .btn-export:disabled{opacity:0.5;cursor:not-allowed}
+.btn-pdf{background:rgba(201,88,30,0.22);border:1px solid rgba(224,123,60,0.4);color:#e07b3c;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-pdf:hover{background:rgba(201,88,30,0.35);border-color:#e07b3c}
+.btn-pdf:disabled{opacity:0.5;cursor:not-allowed}
 .recruiter-filter{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:8px;padding:7px 14px;font-family:var(--font-head);font-size:13px;cursor:pointer;outline:none;appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;min-width:160px}
 .recruiter-filter:focus{border-color:rgba(255,255,255,0.4)}
 .filter-label{font-size:11px;color:rgba(255,255,255,0.5);font-family:var(--font-head);letter-spacing:.05em;text-transform:uppercase}
 .dash-body{padding:1.75rem 1.5rem;max-width:1100px;width:100%;margin:0 auto}
 .dash-section-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
 .dash-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-
 /* KPI cards */
 .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:2rem;overflow-x:auto}
 .kpi{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:.9rem .75rem .75rem;box-shadow:var(--shadow);min-width:110px}
 .kpi-val{font-family:var(--font-head);font-size:26px;font-weight:700;color:var(--primary);line-height:1}
 .kpi-lbl{font-size:12px;color:var(--muted);margin-top:6px}
 .kpi-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-
 /* Charts */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem}
 .chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:2rem}
@@ -218,7 +206,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .chart-sub{font-size:12px;color:var(--muted);margin-bottom:1rem}
 .chart-full{grid-column:1/-1}
 .chart-wrap{position:relative;width:100%}
-
 /* Feedback cards */
 .fb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:2rem}
 .fb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow)}
@@ -229,7 +216,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .fb-item:last-child{border-bottom:none;padding-bottom:0}
 .fb-meta{font-size:11px;color:var(--muted);margin-top:3px}
 .empty-state{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
-
 /* Response table */
 .resp-table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);margin-bottom:2rem}
 .resp-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -244,13 +230,13 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .badge.y{background:#fff7ed;color:#c2410c}
 .badge.r{background:#fef2f2;color:#b91c1c}
 .star-disp{color:#f59e0b;font-size:13px}
-
 /* No data */
 .no-data{text-align:center;padding:4rem 2rem;color:var(--muted)}
 .no-data-icon{font-size:48px;margin-bottom:1rem}
+.filter-row{scrollbar-width:none;-ms-overflow-style:none}
+.filter-row::-webkit-scrollbar{display:none}
 .no-data h3{font-family:var(--font-head);font-size:20px;color:var(--primary);margin-bottom:0.5rem}
 .no-data p{font-size:14px;line-height:1.6}
-
 @media(max-width:640px){
   .access-cards{grid-template-columns:1fr}
   .chart-grid,.chart-grid-3{grid-template-columns:1fr}
@@ -264,7 +250,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 </style>
 </head>
 <body>
-
 <!-- ════════════ LANDING ════════════ -->
 <div id="s-landing" class="screen active center">
   <div class="land-inner">
@@ -292,7 +277,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     <div class="land-footer">Confidential · Urbanrise Human Resources · 2025</div>
   </div>
 </div>
-
 <!-- ════════════ ADMIN LOGIN ════════════ -->
 <div id="s-admin-login" class="screen center">
   <div class="login-card">
@@ -308,7 +292,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     <div style="text-align:center"><button class="btn-back" onclick="showScreen('s-landing')">← Back to Home</button></div>
   </div>
 </div>
-
 <!-- ════════════ SURVEY ════════════ -->
 <div id="s-survey" class="screen" style="flex-direction:column">
   <div class="survey-header">
@@ -330,7 +313,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     </div>
   </div>
 </div>
-
 <!-- ════════════ THANK YOU ════════════ -->
 <div id="s-thankyou" class="screen center">
   <div class="ty-card">
@@ -341,7 +323,6 @@ h1,h2,h3,h4{font-family:var(--font-head)}
     </div>
   </div>
 </div>
-
 <!-- ════════════ DASHBOARD ════════════ -->
 <div id="s-dashboard" class="screen" style="flex-direction:column">
   <div class="dash-header">
@@ -358,12 +339,15 @@ h1,h2,h3,h4{font-family:var(--font-head)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download Excel
       </button>
+      <button class="btn-pdf" onclick="exportToPDF()" title="Download the dashboard (KPIs, charts, tables) as a PDF">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
       <button class="btn-logout" onclick="showScreen('s-landing')">← Exit</button>
     </div>
   </div>
   <div class="dash-body" id="dash-body"></div>
 </div>
-
 <script>
 // ═══════════ STATE ═══════════
 const STORE_KEY = 'ur_responses_v2';
@@ -372,7 +356,6 @@ let currentStep = 0;
 const TOTAL_STEPS = 7;
 let response = {};
 let activeCharts = [];
-
 // ─── Name → Location map (used by the dashboard to derive location from names) ───
 // Recruiting visuals use the recruiter's city; onboarding visuals use the onboarding
 // coordinator's city. Keep this in sync with the backend map. Spaces are ignored so
@@ -395,31 +378,25 @@ const NAME_LOCATION = {
   'Varun Kumar Chakka':'Hyderabad'
 };
 function locFor(name){ return NAME_LOCATION[String(name||'').replace(/\s+/g,' ').trim()] || ''; }
-
 // ═══════════ NAVIGATION ═══════════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
 function showAdminLogin() {
   document.getElementById('admin-pw').value = '';
   document.getElementById('login-err').style.display = 'none';
   showScreen('s-admin-login');
 }
-
 async function checkAdmin() {
   const pw = document.getElementById('admin-pw').value;
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw1ZiWYq6hgbQ7R89kNPGDb45F9XkutAnKKz4yHoMozTeVcKqDSvLZALS-npYMed2yrcA/exec';
-
   const submitBtn = document.querySelector('.login-card .btn-primary');
   submitBtn.textContent = 'Checking…';
   submitBtn.disabled = true;
-
   try {
     const res = await fetch(`${WEB_APP_URL}?action=checkPassword&password=${encodeURIComponent(pw)}`);
     const result = await res.json();
-
     if (result.success) {
       showScreen('s-dashboard');
       await renderDashboard();
@@ -436,7 +413,6 @@ async function checkAdmin() {
     submitBtn.disabled = false;
   }
 }
-
 function gotoSurvey() {
   const draft = loadDraft();
   if (draft && draft.data) {
@@ -456,7 +432,6 @@ function gotoSurvey() {
   renderStep();
   showScreen('s-survey');
 }
-
 // ═══════════ STORAGE ═══════════
 function loadResponses() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
@@ -469,7 +444,6 @@ function saveResponse(r) {
   all.push(r);
   localStorage.setItem(STORE_KEY, JSON.stringify(all));
 }
-
 // ── Draft autosave: lets someone resume after closing the browser/system ──
 function saveDraft() {
   try {
@@ -495,7 +469,6 @@ function scheduleDraftSave() {
 document.addEventListener('click', scheduleDraftSave);
 document.addEventListener('input', scheduleDraftSave);
 document.addEventListener('change', scheduleDraftSave);
-
 // ═══════════ RESPONSE INIT ═══════════
 function initResponse() {
   return {
@@ -524,7 +497,6 @@ function initResponse() {
     o_q14:'', o_q15:''
   };
 }
-
 // ═══════════ SURVEY STEPS ═══════════
 const steps = [
   {badge:'Respondent Information', title:'Tell us about yourself', desc:'This information helps us classify and act on your feedback effectively. All fields in this survey are mandatory.'},
@@ -535,13 +507,11 @@ const steps = [
   {badge:'Part F & G', title:'Orientation & Workspace Readiness', desc:'Rate the orientation program quality and readiness of your workspace and tools.'},
   {badge:'Overall', title:'Overall Satisfaction & Feedback', desc:'Share your overall ratings and open thoughts — your words directly shape how we improve.'},
 ];
-
 // ─── Location ───
 // Location is NOT collected in the form and is NOT derived on the front end.
 // The backend (Google Apps Script doPost) fills the `loc` column from the selected
 // recruiter (fallback: onboarding coordinator). The HR dashboard then reads that
 // `loc` column as its own separate dimension. See the doPost snippet shared alongside.
-
 function renderStep() {
   const s = steps[currentStep];
   document.getElementById('step-label').textContent = `Step ${currentStep+1} of ${TOTAL_STEPS}`;
@@ -549,7 +519,6 @@ function renderStep() {
   document.getElementById('btn-prev').style.visibility = currentStep === 0 ? 'hidden' : 'visible';
   document.getElementById('btn-next').style.display = currentStep === TOTAL_STEPS-1 ? 'none' : 'flex';
   document.getElementById('btn-submit').style.display = currentStep === TOTAL_STEPS-1 ? 'inline-block' : 'none';
-
   const body = document.getElementById('survey-body');
   body.innerHTML = `
     <div class="step-badge">${s.badge}</div>
@@ -562,7 +531,6 @@ function renderStep() {
   window.scrollTo(0,0);
   bindStep();
 }
-
 // ─── HTML builders ───
 const stepHTML = [
   // Step 0 – Info
@@ -605,7 +573,6 @@ const stepHTML = [
         ${['Job Portal','LinkedIn','Referral','Campus','Direct Approach','Other'].map(o=>`<div class="opt${response.src===o?' sel':''}" data-val="${o}" data-field="src">${o}</div>`).join('')}
       </div>
     </div>`,
-
   // Step 1 – Part A
   () => `
     <div class="section-card">
@@ -631,7 +598,6 @@ const stepHTML = [
         'Information provided about the team Structure & reporting, growth path, and expectations'
       ], 'a_t2')}</div>
     </div>`,
-
   // Step 2 – Part B
   () => `
     <div class="section-card">
@@ -685,7 +651,6 @@ const stepHTML = [
         </div>
       </div>
     </div>`,
-
   // Step 3 – Part C
   () => `
     <div class="section-card">
@@ -726,7 +691,6 @@ const stepHTML = [
         </div>
       </div>
     </div>`,
-
   // Step 4 – Part D
   () => `
     <div class="section-card">
@@ -748,7 +712,6 @@ const stepHTML = [
         </div>
       </div>
     </div>`,
-
   // Step 5 – Part F & G
   () => `
     <div class="section-card">
@@ -822,7 +785,6 @@ const stepHTML = [
         'Feeling of inclusion and belonging from your team'
       ], 'g_t12')}</div>
     </div>`,
-
   // Step 6 – Overall
   () => `
     <div class="section-card">
@@ -885,7 +847,6 @@ const stepHTML = [
       </div>
     </div>`,
 ];
-
 // ─── Helper: rating table ───
 function ratingTable(qs, field) {
   return `<table class="rating-table">${qs.map((q,i)=>`
@@ -896,7 +857,6 @@ function ratingTable(qs, field) {
       </div></td>
     </tr>`).join('')}</table>`;
 }
-
 // ─── Helper: yes/no row ───
 function ynRow(label, field) {
   return `<div class="yn-row">
@@ -907,7 +867,6 @@ function ynRow(label, field) {
     </div>
   </div>`;
 }
-
 // ─── Bind interactions ───
 function bindStep() {
   // Stars
@@ -924,7 +883,6 @@ function bindStep() {
       });
     });
   });
-
   // Radio options
   document.querySelectorAll('.opts .opt').forEach(opt => {
     opt.addEventListener('click', () => {
@@ -934,7 +892,6 @@ function bindStep() {
       opt.classList.add('sel');
     });
   });
-
   // Yes/No
   document.querySelectorAll('.yn-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -945,7 +902,6 @@ function bindStep() {
       btn.classList.add('sel');
     });
   });
-
   // Checkboxes (multi-select)
   document.querySelectorAll('.chk').forEach(chk => {
     chk.addEventListener('click', () => {
@@ -956,28 +912,24 @@ function bindStep() {
       else { response[arr].push(val); chk.classList.add('sel'); }
     });
   });
-
   // Textareas / inputs (Location is NOT here — it is auto-derived, never typed)
   ['name','empId','role','dept','doj','mgr'].forEach(f => {
     const map = {name:'i-name',empId:'i-empid',role:'i-role',dept:'i-dept',doj:'i-doj',mgr:'i-mgr'};
     const el = document.getElementById(map[f]);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
-
   // Recruiter / Onboarding Coordinator — collected here and sent to the backend,
   // which derives the candidate's location from these and writes the `loc` column.
   const recEl = document.getElementById('i-recruiter');
   if (recEl) recEl.addEventListener('change', () => { response.recruiter = recEl.value; });
   const obEl = document.getElementById('i-onboarder');
   if (obEl) obEl.addEventListener('change', () => { response.onboarder = obEl.value; });
-
   // Textareas
   ['o_q14','o_q15'].forEach(f => {
     const el = document.getElementById('i-'+f);
     if (el) el.addEventListener('input', () => response[f] = el.value);
   });
 }
-
 window.setNPS = function(n, field, rowId) {
     response[field] = n;
     const row = document.getElementById(rowId);
@@ -991,7 +943,6 @@ window.setNPS = function(n, field, rowId) {
         }
     });
 };
-
 function clearValidationState() {
   const box = document.getElementById('step-error');
   if (box) { box.style.display = 'none'; box.textContent = ''; }
@@ -1093,7 +1044,6 @@ function prevStep() {
   clearValidationState();
   if (currentStep > 0) { currentStep--; renderStep(); saveDraft(); }
 }
-
 /* ══════════════════════════════════════════════════════════════════
    SUBMIT — DUPLICATE-PROOF
    Rows 26–28 (same person, same second) were caused by:
@@ -1105,7 +1055,6 @@ function prevStep() {
    This version fixes 1 and 2. Fix 3 lives in the Apps Script doPost.
    ══════════════════════════════════════════════════════════════════ */
 let isSubmitting = false;
-
 // Retries once. Safe, because the server rejects an id it already stored.
 async function postWithRetry(url, body, attempts = 2) {
   for (let i = 0; i < attempts; i++) {
@@ -1119,36 +1068,28 @@ async function postWithRetry(url, body, attempts = 2) {
     }
   }
 }
-
 async function submitSurvey() {
   if (isSubmitting) return;                    // blocks double/triple clicks
   if (!validateStep(currentStep)) return;      // the old code skipped this
-
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
   const btn = document.getElementById('btn-submit');
-
   isSubmitting = true;
   btn.disabled = true;
   btn.textContent = 'Submitting…';
-
   const formData = new URLSearchParams();
   formData.append('data', JSON.stringify(response));
-
   await postWithRetry(WEB_APP_URL, formData);
-
   // NO "submission failed" alert. An unreadable response almost always
   // still wrote the row; telling the user to retry is what created the
   // duplicates. If a retry does slip through, doPost discards it by id.
   saveResponse(response);
   clearDraft();
   showScreen('s-thankyou');
-
   // Reset for the next respondent on a shared laptop/kiosk.
   isSubmitting = false;
   btn.disabled = false;
   btn.textContent = 'Submit Survey ✓';
 }
-
 // ═══════════ DASHBOARD ═══════════
 let globalData = [];
 let globalAllData = []; // stores last fetched dashboard data for Excel export
@@ -1156,7 +1097,12 @@ window._activeRecruiterFilter = 'all';
 window._allRecruiters = [];
 window._activeOnboarderFilter = 'all';
 window._allOnboarders = [];
-
+window._activeDojMonth = ''; // Date-of-Joining month filter ("YYYY-MM"), blank = unbounded
+window._dashSettled = false; // guards against a browser-restored value auto-triggering a filter
+window._activeDojFrom = ''; // derived first day of the selected month
+window._activeDojTo = '';   // derived last day of the selected month
+window._allJoinersData = []; // full parsed rows from the "Joining Details" sheet
+window._totalJoiners = null; // unfiltered grand total headcount, used in Excel export
 // Normalises a field that may be:
 //   - already a JS array     → [4,3,3,4]
 //   - a JSON-style string    → "[4,3,3,4]"
@@ -1174,16 +1120,109 @@ function parseField(val) {
   const n = Number(s);
   return isNaN(n) ? [] : [n];
 }
-
+// Fetches the "Joining Details" sheet (action=getJoiners) and returns the
+// parsed rows (minus header), keyed positionally: EIN, Name, Department,
+// Date, Office, City, Recruiter (columns A–G). Never throws — returns an
+// empty array on any failure so filters/KPIs degrade gracefully.
+async function fetchJoinersData(webAppUrl) {
+  try {
+    const res = await fetch(`${webAppUrl}?action=getJoiners`);
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length <= 1) return [];
+    return rows.slice(1).map(row => ({
+      ein: row[0], name: row[1], dept: row[2], date: row[3],
+      office: row[4], city: row[5], recruiter: row[6]
+    }));
+  } catch (err) {
+    console.error('Joining Details fetch error:', err);
+    return [];
+  }
+}
+// Normalises any date-ish value (Date object, ISO string, or plain
+// "YYYY-MM-DD") to a "YYYY-MM-DD" string using UTC components — the same
+// convention fmtDOJ() below already uses for display, so filtering and
+// display always agree on which calendar day a record falls on.
+// Urbanrise's Google Sheet runs in the Asia/Kolkata timezone (UTC+5:30).
+// Apps Script serialises Date cells to UTC before sending them to the
+// browser, so "01-Jul-26 00:00 IST" arrives here as "2026-06-30T18:30:00Z".
+// Reading that back with getUTCDate() (or even the viewer's own local
+// getDate(), if their machine isn't set to IST) rolls the day back by one.
+// Shifting by the fixed +5:30 offset before reading the date components
+// guarantees we always recover the exact calendar day the spreadsheet
+// shows, regardless of where the dashboard is being viewed from.
+const IST_OFFSET_MS = (5 * 60 + 30) * 60000;
+function istParts(d) {
+  const shifted = new Date(d.getTime() + IST_OFFSET_MS);
+  return {
+    yyyy: shifted.getUTCFullYear(),
+    mm: String(shifted.getUTCMonth() + 1).padStart(2, '0'),
+    dd: String(shifted.getUTCDate()).padStart(2, '0')
+  };
+}
+function toYMD(val) {
+  if (!val) return '';
+  // Only take this literal fast path for a PURE date-only string with no
+  // time component — exactly what <input type=date> sends (e.g. "2026-07-09").
+  // A full ISO timestamp from Apps Script (e.g. "2026-06-30T18:30:00.000Z")
+  // must NOT match here — it needs the IST correction below, otherwise its
+  // raw UTC date prefix is a day off from the sheet's actual calendar date.
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    return val;
+  }
+  try {
+    const d = new Date(val);
+    if (isNaN(d)) return '';
+    const p = istParts(d);
+    return `${p.yyyy}-${p.mm}-${p.dd}`;
+  } catch { return ''; }
+}
+// Converts a month-input value ("YYYY-MM") into the first and last calendar
+// day of that month, so the existing from/to range-filtering logic can be
+// reused unchanged. Blank input = no bound on either side.
+function monthToRange(monthStr) {
+  if (!monthStr || !/^\d{4}-\d{2}$/.test(monthStr)) return { from: '', to: '' };
+  const [y, m] = monthStr.split('-').map(Number);
+  const from = `${monthStr}-01`;
+  const lastDay = new Date(y, m, 0).getDate(); // day 0 of next month = last day of this month
+  const to = `${monthStr}-${String(lastDay).padStart(2, '0')}`;
+  return { from, to };
+}
+// Applies the same Recruiter / Location / DOJ-range filters used on survey
+// responses to the Joining Details rows. Recruiter names in that sheet use
+// "First - Last" formatting; normalise the dash the same way the survey
+// dashboard does elsewhere. Dates are compared as "YYYY-MM-DD" strings
+// (which sort correctly lexicographically), so no timezone math is needed.
+// dojFrom/dojTo are set equal to each other by the single date-picker in
+// the UI, so this ends up matching one calendar day; leave both blank to
+// include every joiner regardless of date.
+function filterJoinersData(joiners, recFilter, locFilter, dojFrom, dojTo) {
+  // If both dates are set but From is after To (e.g. picked in the wrong
+  // order), swap them instead of silently matching nothing.
+  if (dojFrom && dojTo && dojFrom > dojTo) { const t = dojFrom; dojFrom = dojTo; dojTo = t; }
+  return (joiners || []).filter(j => {
+    if (recFilter !== 'all') {
+      const jr = String(j.recruiter || '').replace(/\s*-\s*/g, ' ').trim();
+      if (jr !== recFilter) return false;
+    }
+    if (locFilter !== 'all') {
+      const jc = String(j.city || '').trim();
+      if (jc !== locFilter) return false;
+    }
+    if (dojFrom || dojTo) {
+      const jy = toYMD(j.date);
+      if (!jy) return false;
+      if (dojFrom && jy < dojFrom) return false;
+      if (dojTo && jy > dojTo) return false;
+    }
+    return true;
+  });
+}
 async function renderDashboard() {
   activeCharts.forEach(c => c.destroy());
   activeCharts = [];
-
   const body = document.getElementById('dash-body');
   body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Loading analytics…</div>';
-
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
-
   let all = [];
   try {
     const res = await fetch(WEB_APP_URL);
@@ -1215,7 +1254,6 @@ async function renderDashboard() {
       return;
     }
   }
-
   // FIX: guard the dashboard too — if any duplicate rows are still in the
   // sheet, collapse them by id so KPIs/eNPS are not inflated.
   const _seen = {};
@@ -1225,9 +1263,7 @@ async function renderDashboard() {
     _seen[r.id] = true;
     return true;
   });
-
   globalAllData = all;
-
   // Derive location from names: recruiting side uses the recruiter's city,
   // onboarding side uses the onboarding coordinator's city. `loc` (the generic
   // candidate location used by the filter/table/export) defaults to the recruiter's
@@ -1237,36 +1273,70 @@ async function renderDashboard() {
     r.onbLoc = locFor(r.onboarder) || 'Not Specified';
     if (!r.loc) r.loc = r.recLoc;
   });
-
   // Populate recruiter & location filter options
   window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   window._allLocations  = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
   window._allOnboarders = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
-
+  // Full Joining Details rows — fetched once per dashboard load. The KPI card
+  // re-filters this client-side (Recruiter / Location / DOJ) on every render,
+  // same as the survey responses.
+  window._allJoinersData = await fetchJoinersData(WEB_APP_URL);
+  window._totalJoiners = window._allJoinersData.length; // unfiltered grand total, used in Excel export
   renderDashboardData(all);
 }
-
 // ── Combined filter function ──
 function applyRecruiterFilter() { applyFilters(); }
+// Guards the month field specifically: Chrome can restore a stale typed
+// value into it on reload and fire a change event before the user has
+// touched anything. If the dashboard hasn't "settled" yet, treat that
+// change as spurious — snap the field back to blank/our real state and
+// do NOT apply it as a filter.
+function handleDojMonthChange() {
+  if (!window._dashSettled) {
+    const el = document.getElementById('doj-month-filter');
+    if (el) el.value = window._activeDojMonth || '';
+    return;
+  }
+  applyFilters();
+}
 function applyFilters() {
   const rec = document.getElementById('recruiter-filter') ? document.getElementById('recruiter-filter').value : 'all';
   const loc = document.getElementById('location-filter')  ? document.getElementById('location-filter').value  : 'all';
   const ob  = document.getElementById('onboarder-filter') ? document.getElementById('onboarder-filter').value  : 'all';
+  const dojMonth = document.getElementById('doj-month-filter') ? document.getElementById('doj-month-filter').value : '';
+  const { from: dojFrom, to: dojTo } = monthToRange(dojMonth);
   window._activeRecruiterFilter  = rec;
   window._activeLocFilter        = loc;
   window._activeOnboarderFilter  = ob;
+  window._activeDojMonth         = dojMonth;
+  window._activeDojFrom          = dojFrom;
+  window._activeDojTo            = dojTo;
   let filtered = globalAllData;
   if (rec !== 'all') filtered = filtered.filter(r => (r.recruiter || 'Not Assigned') === rec);
   if (loc !== 'all') filtered = filtered.filter(r => (r.loc || 'Not Specified') === loc);
   if (ob  !== 'all') filtered = filtered.filter(r => (r.onboarder || 'Not Assigned') === ob);
+  // Blank month = no date filtering, i.e. full data.
+  if (dojFrom || dojTo) {
+    filtered = filtered.filter(r => {
+      const ry = toYMD(r.doj);
+      if (!ry) return false;
+      if (dojFrom && ry < dojFrom) return false;
+      if (dojTo && ry > dojTo) return false;
+      return true;
+    });
+  }
   activeCharts.forEach(c => c.destroy());
   activeCharts = [];
   renderDashboardData(filtered);
 }
-
 function renderDashboardData(all) {
+  // Chrome can restore a previously-typed value into the month/date field
+  // on reload and fire a synthetic "change" event for it before the user
+  // has had any chance to touch the page. Block that window: any change
+  // event that fires before the dashboard has "settled" is treated as
+  // spurious and ignored rather than silently applied as a real filter.
+  window._dashSettled = false;
   const body = document.getElementById('dash-body');
-
   // KPIs
   const n = all.length;
   const avgNPS = avg(all.map(r => r.o_nps).filter(v => v >= 0));
@@ -1283,7 +1353,11 @@ function renderDashboardData(all) {
   const npsValidCount2 = all.filter(r=>r.o_nps2>=0).length;
   const npsScore2 = enpsScore(all, 'o_nps2') ?? 0;
   const npsGroups2 = {Promoters: promoters2, Passives: all.filter(r=>r.o_nps2>=7&&r.o_nps2<=8).length, Detractors: detractors2};
-
+  // Joining Details count — filtered the same way as the response table
+  // (Recruiter / Location / DOJ). Onboarder isn't filterable here since
+  // Joining Details has no onboarder column.
+  const filteredJoiners = filterJoinersData(window._allJoinersData, window._activeRecruiterFilter, window._activeLocFilter, window._activeDojFrom, window._activeDojTo);
+  const totalJoiners = filteredJoiners.length;
   // Section averages
   const secAvgs = [
     {l:'Recruiter Contact', v: avg(all.map(r=>avgArr(r.a_t1)))},
@@ -1297,13 +1371,11 @@ function renderDashboardData(all) {
     {l:'Workspace Readiness', v: avg(all.map(r=>avgArr(r.g_t11)))},
     {l:'Team Introduction', v: avg(all.map(r=>avgArr(r.g_t12)))},
   ];
-
   const srcCount = countBy(all, r => r.src || 'Not specified');
   const locCount = countBy(all, r => r.recLoc || 'Not Specified');
   const rndCount = countBy(all, r => r.b_q2 || 'Not specified');
   const npsGroups = {Promoters: promoters, Passives: all.filter(r=>r.o_nps>=7&&r.o_nps<=8).length, Detractors: detractors};
   const feelCount = countBy(all, r => r.d_q8 || 'Not specified');
-
   const onboarderNames = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
   const onboarderStats = onboarderNames.map(name => {
     const rows  = all.filter(r => (r.onboarder || 'Not Assigned') === name);
@@ -1358,49 +1430,54 @@ function renderDashboardData(all) {
     const avgAlignR = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
     return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv, avgNPSr, avgConf, avgAlignR };
   });
-
   if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
   if (window._activeLocFilter === undefined) window._activeLocFilter = 'all';
   if (window._activeOnboarderFilter === undefined) window._activeOnboarderFilter = 'all';
+  if (window._activeDojMonth === undefined) window._activeDojMonth = '';
+  if (window._activeDojFrom === undefined) window._activeDojFrom = '';
+  if (window._activeDojTo === undefined) window._activeDojTo = '';
   if (window._allRecruiters === undefined) window._allRecruiters = [];
   if (window._allLocations === undefined) window._allLocations = [];
   if (window._allOnboarders === undefined) window._allOnboarders = [];
   const activeFilter = window._activeRecruiterFilter;
   const activeLocFilter = window._activeLocFilter;
   const activeOnboarderFilter = window._activeOnboarderFilter;
-
-  const DROPDOWN_STYLE = `background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:6px 30px 6px 12px;font-family:var(--font-body);font-size:13px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;box-shadow:var(--shadow);min-width:160px`;
-
+  const activeDojMonth = window._activeDojMonth;
+  const activeDojFrom = window._activeDojFrom;
+  const activeDojTo = window._activeDojTo;
+  const DROPDOWN_STYLE = `background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:7px;padding:5px 24px 5px 10px;font-family:var(--font-body);font-size:12px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b7280%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 7px center;cursor:pointer;box-shadow:var(--shadow)`;
+  const DATE_INPUT_STYLE = `background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:7px;padding:5px 8px;font-family:var(--font-body);font-size:12px;outline:none;cursor:pointer;box-shadow:var(--shadow)`;
   body.innerHTML = `
     <div style="margin-bottom:1.75rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
-        <div class="dash-section-title" style="margin-bottom:0;flex:1;min-width:100px">Key Metrics</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em">Location</span>
-          <select id="location-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE}">
+      <div class="dash-section-title">Key Metrics</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+      <div class="filter-row" style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow-x:auto;flex:0 1 auto;min-width:0">
+          <span style="font-size:11px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;white-space:nowrap">Location</span>
+          <select id="location-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:92px;flex-shrink:0">
             <option value="all">All Locations</option>
           </select>
-          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:4px">Recruiter</span>
-          <select id="recruiter-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:180px">
+          <span style="font-size:11px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:3px;white-space:nowrap">Recruiter</span>
+          <select id="recruiter-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:108px;flex-shrink:0">
             <option value="all">All Recruiters</option>
           </select>
-          <span style="font-size:12px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:4px">Onboarder</span>
-          <select id="onboarder-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:180px">
+          <span style="font-size:11px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:3px;white-space:nowrap">Onboarder</span>
+          <select id="onboarder-filter" onchange="applyFilters()" style="${DROPDOWN_STYLE};min-width:108px;flex-shrink:0">
             <option value="all">All Onboarders</option>
           </select>
-          ${(activeFilter !== 'all' || activeLocFilter !== 'all' || activeOnboarderFilter !== 'all') ? `<button onclick="document.getElementById('recruiter-filter').value='all';document.getElementById('location-filter').value='all';document.getElementById('onboarder-filter').value='all';applyFilters()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-head)">✕ Clear</button>` : ''}
-        </div>
+          <span style="font-size:11px;color:var(--muted);font-family:var(--font-head);letter-spacing:.04em;margin-left:3px;white-space:nowrap">Joining Month</span>
+          <input type="month" id="doj-month-filter" autocomplete="off" value="${activeDojMonth}" onchange="handleDojMonthChange()" style="${DATE_INPUT_STYLE};min-width:130px;flex-shrink:0">
+      </div>
+      ${(activeFilter !== 'all' || activeLocFilter !== 'all' || activeOnboarderFilter !== 'all' || activeDojMonth) ? `<button onclick="document.getElementById('recruiter-filter').value='all';document.getElementById('location-filter').value='all';document.getElementById('onboarder-filter').value='all';document.getElementById('doj-month-filter').value='';applyFilters()" style="background:rgba(201,88,30,0.08);border:1px solid rgba(201,88,30,0.25);color:var(--accent);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-head);white-space:nowrap;flex-shrink:0">✕ Clear</button>` : ''}
       </div>
       <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">${totalJoiners === null ? '—' : totalJoiners}</div><div class="kpi-lbl">Total Joiners${(activeFilter!=='all'||activeLocFilter!=='all'||activeDojMonth)?' (filtered)':''}</div></div>
         <div class="kpi"><div class="kpi-val">${n}</div><div class="kpi-lbl">Total Responses</div></div>
         <div class="kpi"><div class="kpi-val" style="color:${npsScore>=50?'var(--green)':npsScore>=0?'#d97706':'#dc2626'}">${npsScore}</div><div class="kpi-lbl">eNPS Score (Candidate Experience)</div></div>
         <div class="kpi"><div class="kpi-val" style="color:${npsScore2>=50?'var(--green)':npsScore2>=0?'#d97706':'#dc2626'}">${npsScore2}</div><div class="kpi-lbl">eNPS Score (Onboarding & Orientation Experience)</div></div>
-        <div class="kpi"><div class="kpi-val">${avgNPS.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/10</span></div><div class="kpi-lbl">Avg NPS Score</div></div>
         <div class="kpi"><div class="kpi-val">${avgConfidence.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Overall Confidence Score on Urbanrise</div></div>
         <div class="kpi"><div class="kpi-val">${avgAlign.toFixed(1)}<span style="font-size:16px;color:var(--muted)">/5</span></div><div class="kpi-lbl">Overall Alignment Score on Urbanrise Culture</div></div>
       </div>
     </div>
-
     <div class="chart-grid" style="margin-bottom:1.75rem">
       <div class="chart-card">
         <div class="chart-title">Recruiting eNPS Distribution</div>
@@ -1413,7 +1490,6 @@ function renderDashboardData(all) {
         <div class="chart-wrap" style="height:220px"><canvas id="ch-nps2"></canvas></div>
       </div>
     </div>
-
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Section-wise Performance</div>
       <div class="chart-card">
@@ -1439,7 +1515,6 @@ function renderDashboardData(all) {
         <div class="chart-wrap" style="height:220px"><canvas id="ch-loc-enps"></canvas></div>
       </div>
     </div>
-
     <div class="chart-grid" style="margin-bottom:1.75rem">
       <div class="chart-card">
         <div class="chart-title">Interview Rounds</div>
@@ -1452,7 +1527,6 @@ function renderDashboardData(all) {
         <div class="chart-wrap" style="height:200px"><canvas id="ch-feel"></canvas></div>
       </div>
     </div>
-
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Recruiter-wise — Recruiting NPS (Q13a)</div>
       <div class="resp-table-wrap">
@@ -1490,7 +1564,6 @@ function renderDashboardData(all) {
         </table>
       </div>
     </div>
-
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Onboarder-wise — Onboarding NPS (Q13b)</div>
       <div class="resp-table-wrap">
@@ -1524,7 +1597,6 @@ function renderDashboardData(all) {
         </table>
       </div>
     </div>
-
     <div style="margin-bottom:1.75rem">
       <div class="dash-section-title">Location-wise Breakdown</div>
       <div class="resp-table-wrap">
@@ -1561,19 +1633,15 @@ function renderDashboardData(all) {
         </table>
       </div>
     </div>
-
     <div style="margin-bottom:1.75rem">
   <div class="dash-section-title">Open Feedback</div>
-
   <div class="fb-grid" style="grid-template-columns:1fr 1fr;">
-
     <!-- Improvement Areas -->
     <div class="fb-card">
       <div class="fb-card-head">
         <div class="fb-card-icon" style="background:#e3f2fd">✨</div>
         <div class="fb-card-type">Improvement Areas</div>
       </div>
-
       ${
         all.filter(r => r.o_q14)
           .slice(-5)
@@ -1589,14 +1657,12 @@ function renderDashboardData(all) {
         || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'
       }
     </div>
-
     <!-- Suggestions -->
     <div class="fb-card">
       <div class="fb-card-head">
         <div class="fb-card-icon" style="background:#e8f5e9">💡</div>
         <div class="fb-card-type">Suggestions</div>
       </div>
-
       ${
         all.filter(r => r.o_q15)
           .slice(-5)
@@ -1612,7 +1678,6 @@ function renderDashboardData(all) {
         || '<div class="fb-item" style="color:var(--muted)">No responses yet</div>'
       }
     </div>
-
   </div>
 </div>
     <div style="margin-bottom:2rem">
@@ -1674,7 +1739,6 @@ function renderDashboardData(all) {
       </div>
     </div>
   `;
-
   // Populate dropdowns after render
   setTimeout(() => {
     const recEl = document.getElementById('recruiter-filter');
@@ -1698,8 +1762,17 @@ function renderDashboardData(all) {
           `<option value="${o}"${activeOnboarderFilter === o ? ' selected' : ''}>${o}</option>`
         ).join('');
     }
-  }, 50);
-
+    // Chrome can restore/autofill a previously-typed value into a date
+    // input on reload, independent of the HTML value attribute we just
+    // rendered. Force the field back to match our actual filter state so
+    // the dashboard never opens "silently pre-filtered" to some stale or
+    // auto-filled date.
+    const monthEl = document.getElementById('doj-month-filter');
+    if (monthEl && monthEl.value !== activeDojMonth) monthEl.value = activeDojMonth || '';
+    // The dashboard has now had a full render + correction pass. From this
+    // point on, a change on the month field is trusted as a real user pick.
+    window._dashSettled = true;
+  }, 400);
   // ── Draw charts ──
  setTimeout(() => {
     // Section bar
@@ -1727,7 +1800,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(secChart);
-
     // NPS donut
     const npsChart = new Chart(document.getElementById('ch-nps'), {
       type:'doughnut',
@@ -1752,7 +1824,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(npsChart);
-
     // Onboarding NPS donut
     const npsChart2 = new Chart(document.getElementById('ch-nps2'), {
       type:'doughnut',
@@ -1777,7 +1848,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(npsChart2);
-
     // Source pie
     const srcChart = new Chart(document.getElementById('ch-src'), {
       type:'doughnut',
@@ -1802,7 +1872,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(srcChart);
-
     // Responses-by-location donut (location comes from recruiter / onboarder, filled by backend)
     const locPieChart = new Chart(document.getElementById('ch-loc-pie'), {
       type:'doughnut',
@@ -1827,7 +1896,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(locPieChart);
-
     // Location eNPS grouped bar chart
     const locEnpsLabels = locationStats.map(s => s.loc);
     const locEnpsChart = new Chart(document.getElementById('ch-loc-enps'), {
@@ -1858,7 +1926,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(locEnpsChart);
-
     // Interview rounds bar
     const rndChart = new Chart(document.getElementById('ch-rnd'), {
       type:'bar',
@@ -1884,7 +1951,6 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(rndChart);
-
     // Day 1 feeling
     const feelChart = new Chart(document.getElementById('ch-feel'), {
       type:'bar',
@@ -1912,21 +1978,17 @@ function renderDashboardData(all) {
     activeCharts.push(feelChart);
   }, 100);
 }
-
 // ═══════════ EXCEL EXPORT ═══════════
 function exportToExcel() {
   if (!globalAllData.length) {
     alert('No data loaded yet. Please wait for the dashboard to finish loading.');
     return;
   }
-
   const btn = document.querySelector('.btn-export');
   btn.disabled = true;
   btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
-
   try {
     const wb = XLSX.utils.book_new();
-
     // ── Sheet 1: All Responses ──
     const responseRows = globalAllData.map((r, i) => ({
       '#':                  i + 1,
@@ -1961,7 +2023,6 @@ function exportToExcel() {
       'Improvement Areas':          r.o_q14 || '',
       'Suggestions':                r.o_q15 || '',
     }));
-
     const ws1 = XLSX.utils.json_to_sheet(responseRows);
     // Column widths
     ws1['!cols'] = [
@@ -1970,7 +2031,6 @@ function exportToExcel() {
       {wch:20},{wch:10},{wch:12},{wch:30},{wch:30},{wch:30}
     ];
     XLSX.utils.book_append_sheet(wb, ws1, 'All Responses');
-
     // ── Sheet 2: Summary KPIs ──
     const n = globalAllData.length;
     const npsValid = globalAllData.filter(r => r.o_nps >= 0);
@@ -1978,9 +2038,9 @@ function exportToExcel() {
     const passives  = globalAllData.filter(r => r.o_nps >= 7 && r.o_nps <= 8).length;
     const detractors= globalAllData.filter(r => r.o_nps >= 0 && r.o_nps <= 6).length;
     const npsScore  = enpsScore(globalAllData, 'o_nps') ?? 0;
-
     const summaryRows = [
       { 'Metric': 'Total Responses',       'Value': n },
+      { 'Metric': 'Total Joiners (Company Records)', 'Value': window._totalJoiners === null ? 'N/A' : window._totalJoiners },
       { 'Metric': 'eNPS Score',            'Value': npsScore },
       { 'Metric': 'Avg Overall Rating',    'Value': +avg(globalAllData.map(r => avgArr(r.o_r))).toFixed(2) },
       { 'Metric': 'Avg NPS Rating',        'Value': +avg(globalAllData.map(r => r.o_nps).filter(v => v >= 0)).toFixed(2) },
@@ -2005,11 +2065,9 @@ function exportToExcel() {
     const ws2 = XLSX.utils.json_to_sheet(summaryRows);
     ws2['!cols'] = [{wch:24},{wch:14}];
     XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
-
     // ── Download ──
     const date = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(wb, `Urbanrise_Onboarding_Survey_${date}.xlsx`);
-
   } catch(e) {
     console.error('Export error:', e);
     alert('Export failed: ' + e.message);
@@ -2018,7 +2076,144 @@ function exportToExcel() {
     btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Excel`;
   }
 }
+// ═══════════ PDF EXPORT ═══════════
+// Captures the dashboard section-by-section (KPI block, each chart row, each
+// table, feedback cards) rather than one giant screenshot — including
+// whatever Recruiter/Location/Onboarder/DOJ filters are currently active, so
+// the "Total Joiners" KPI (and every other number) in the PDF always matches
+// exactly what's on screen: the full count when the DOJ range is blank, or
+// the DOJ-filtered count when a From/To date is set.
+//
+// Wide tables (e.g. "All Responses") normally scroll horizontally inside
+// .resp-table-wrap; if captured as-is, whatever's scrolled off-screen would
+// be missing from the PDF. Before capturing each section, any scrollable
+// descendant is temporarily expanded to its full natural width so nothing
+// is cropped, then restored afterward. If a section still ends up wider
+// than the PDF page, the whole section image is scaled down (not cropped)
+// so every column stays visible, just smaller. Each section also starts on
+// a fresh page if it wouldn't fit in the space left on the current one, so
+// tables/charts never get sliced awkwardly across a page break.
+function unclipScrollables(root) {
+  const restoreFns = [];
+  const candidates = [root, ...root.querySelectorAll('*')];
+  candidates.forEach(el => {
+    if (el.scrollWidth > el.clientWidth + 1) {
+      const prev = { overflow: el.style.overflow, overflowX: el.style.overflowX, width: el.style.width, maxWidth: el.style.maxWidth };
+      el.style.overflow = 'visible';
+      el.style.overflowX = 'visible';
+      el.style.width = 'max-content';
+      el.style.maxWidth = 'none';
+      restoreFns.push(() => {
+        el.style.overflow = prev.overflow;
+        el.style.overflowX = prev.overflowX;
+        el.style.width = prev.width;
+        el.style.maxWidth = prev.maxWidth;
+      });
+    }
+  });
+  return () => restoreFns.forEach(fn => fn());
+}
+async function exportToPDF() {
+  const target = document.getElementById('dash-body');
+  if (!target || !target.innerHTML.trim()) {
+    alert('No dashboard content to export yet. Please wait for it to finish loading.');
+    return;
+  }
+  const btn = document.querySelector('.btn-pdf');
+  const originalHTML = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
+  }
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const margin = 24;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const usableWidth = pageWidth - margin * 2;
+    const usableHeight = pageHeight - margin * 2;
 
+    const sections = Array.from(target.children);
+    let cursorY = margin;
+    let pageHasContent = false;
+
+    for (const section of sections) {
+      if (!section || section.offsetHeight === 0) continue;
+      const restore = unclipScrollables(section);
+      // Let layout settle after un-clipping before measuring/capturing.
+      await new Promise(r => setTimeout(r, 30));
+      let canvas;
+      try {
+        // width/height (not windowWidth/windowHeight) are what actually
+        // control the captured canvas's output size — windowWidth only
+        // changes the simulated browser viewport for responsive layout,
+        // it does NOT widen the capture region. Using the wrong pair here
+        // was the reason wide, un-clipped tables still came out cropped.
+        canvas = await html2canvas(section, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#f4f1ec',
+          width: section.scrollWidth,
+          height: section.scrollHeight,
+          windowWidth: Math.max(section.scrollWidth, window.innerWidth)
+        });
+      } finally {
+        restore();
+      }
+
+      // Scale the whole section image down (never crop) so it fits the page width.
+      let imgWidth = usableWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      if (imgHeight > usableHeight) {
+        // Very tall section (e.g. the full "All Responses" table) — slice
+        // it across as many pages as needed instead of shrinking it to
+        // near-illegible size.
+        const imgData = canvas.toDataURL('image/png');
+        let remaining = canvas.height;
+        let sy = 0;
+        const sliceCanvasHeightPx = Math.floor((usableHeight * canvas.width) / usableWidth);
+        while (remaining > 0) {
+          if (pageHasContent) { pdf.addPage(); cursorY = margin; }
+          const sliceHeightPx = Math.min(sliceCanvasHeightPx, remaining);
+          const sliceCanvas = document.createElement('canvas');
+          sliceCanvas.width = canvas.width;
+          sliceCanvas.height = sliceHeightPx;
+          const ctx = sliceCanvas.getContext('2d');
+          ctx.drawImage(canvas, 0, sy, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+          const sliceData = sliceCanvas.toDataURL('image/png');
+          const sliceImgHeight = (sliceHeightPx * usableWidth) / canvas.width;
+          pdf.addImage(sliceData, 'PNG', margin, cursorY, usableWidth, sliceImgHeight);
+          cursorY += sliceImgHeight + 10;
+          pageHasContent = true;
+          sy += sliceHeightPx;
+          remaining -= sliceHeightPx;
+        }
+        continue;
+      }
+
+      if (pageHasContent && cursorY + imgHeight > pageHeight - margin) {
+        pdf.addPage();
+        cursorY = margin;
+      }
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', margin, cursorY, imgWidth, imgHeight);
+      cursorY += imgHeight + 10;
+      pageHasContent = true;
+    }
+
+    const date = new Date().toISOString().slice(0, 10);
+    pdf.save(`Urbanrise_Onboarding_Dashboard_${date}.pdf`);
+  } catch (e) {
+    console.error('PDF export error:', e);
+    alert('PDF export failed: ' + e.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+    }
+  }
+}
 // ═══════════ UTILS ═══════════
 function avg(arr) {
   const v = arr.filter(x=>x>0);
@@ -2051,13 +2246,18 @@ function fmtDate(ts) {
 }
 function fmtDOJ(val) {
   if (!val) return "—";
+  // Same fast path as toYMD(): only a PURE date-only string (no time
+  // component) is read directly; anything with a time/Z part must go
+  // through the IST-corrected Date branch below.
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    const [y, m, dnum] = val.split('-');
+    return `${dnum}-${m}-${y}`;
+  }
   try {
     const d = new Date(val);
     if (isNaN(d)) return val;
-    const dd = String(d.getUTCDate()).padStart(2,"0");
-    const mm = String(d.getUTCMonth()+1).padStart(2,"0");
-    const yyyy = d.getUTCFullYear();
-    return `${dd}-${mm}-${yyyy}`;
+    const p = istParts(d);
+    return `${p.dd}-${p.mm}-${p.yyyy}`;
   } catch { return val; }
 }
 function starSpan(v) {
