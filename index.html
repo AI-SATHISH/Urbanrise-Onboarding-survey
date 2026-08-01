@@ -1277,15 +1277,27 @@ async function renderDashboard() {
     r.onbLoc = locFor(r.onboarder) || 'Not Specified';
     if (!r.loc) r.loc = r.recLoc;
   });
-  // Populate recruiter & location filter options
-  window._allRecruiters = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
-  window._allLocations  = [...new Set(all.map(r => r.loc || 'Not Specified'))].sort();
-  window._allOnboarders = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
   // Full Joining Details rows — fetched once per dashboard load. The KPI card
   // re-filters this client-side (Recruiter / Location / DOJ) on every render,
   // same as the survey responses.
   window._allJoinersData = await fetchJoinersData(WEB_APP_URL);
   window._totalJoiners = window._allJoinersData.length; // unfiltered grand total, used in Excel export
+  // Populate recruiter & location filter options — union of names found in
+  // survey responses AND names found in Joining Details. A recruiter can
+  // have joiners recorded before their first survey response comes back
+  // (or vice versa); building the filter list from responses alone made
+  // that person invisible in the dropdown even though their data exists.
+  // Joining Details recruiter names use "First - Last" formatting; the dash
+  // is normalised away the same way it is everywhere else in this file.
+  const joinerRecruiters = window._allJoinersData
+    .map(j => String(j.recruiter || '').replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  const joinerLocations = window._allJoinersData
+    .map(j => String(j.city || '').trim())
+    .filter(Boolean);
+  window._allRecruiters = [...new Set([...all.map(r => r.recruiter || 'Not Assigned'), ...joinerRecruiters])].sort();
+  window._allLocations  = [...new Set([...all.map(r => r.loc || 'Not Specified'), ...joinerLocations])].sort();
+  window._allOnboarders = [...new Set(all.map(r => r.onboarder || 'Not Assigned'))].sort();
   renderDashboardData(all);
 }
 // ── Combined filter function ──
