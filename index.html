@@ -558,7 +558,7 @@ const stepHTML = [
         <div class="q-block" style="margin-top:12px"><div class="q-label">Recruiter Name <span class="req">*</span></div>
         <select class="q-input" id="i-recruiter">
           <option value="">— Select Recruiter —</option>
-          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal  Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Sejal Choudhary','Srujan Devabhaktuni','Devika Singh','Syed Mubashir Hussain'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
+          ${['Anurag Kumar Singh','Kamal Nath J','Sangeetha Devi Velkumar','Archana Gupta','Soma Mohanty','Sanjay V','Komal Dev G D','Varun Kumar Chakka','Hari Krishna Maddugalla','Sejal Choudhary','Srujan Devabhaktuni','Devika Singh','Syed Mubashir Hussain'].map(r=>`<option value="${r}"${response.recruiter===r?' selected':''}>${r}</option>`).join('')}
         </select>
     </div>
     <div class="q-block" style="margin-top:12px"><div class="q-label">Onboarding Coordinator Name <span class="req">*</span></div>
@@ -1201,7 +1201,7 @@ function filterJoinersData(joiners, recFilter, locFilter, dojFrom, dojTo) {
   if (dojFrom && dojTo && dojFrom > dojTo) { const t = dojFrom; dojFrom = dojTo; dojTo = t; }
   return (joiners || []).filter(j => {
     if (recFilter !== 'all') {
-      const jr = String(j.recruiter || '').replace(/\s*-\s*/g, ' ').trim();
+      const jr = String(j.recruiter || '').replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim();
       if (jr !== recFilter) return false;
     }
     if (locFilter !== 'all') {
@@ -1242,7 +1242,11 @@ async function renderDashboard() {
       //    (e.g. an all-numeric name/manager) come back as numbers, which have no .replace) ──
       ['name','mgr','recruiter','onboarder'].forEach(f => {
         if (obj[f] !== null && obj[f] !== undefined && obj[f] !== '')
-          obj[f] = String(obj[f]).replace(/\s*-\s*/g, ' ').trim();
+          // Collapse dashes AND any stray double-spacing (e.g. a typo like
+          // "Komal  Dev G D" from an older submission) down to a single
+          // space, so the same person always normalises to one identical
+          // string instead of showing up as two near-duplicate entries.
+          obj[f] = String(obj[f]).replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim();
       });
       return obj;
     });
