@@ -5,11 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Urbanrise — Day 1 Onboarding Survey</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<!-- Chart.js loads with `defer` so it downloads in the background instead of
+     blocking the initial page paint — it's only needed once someone logs
+     into the Admin Dashboard, not for the landing/survey screens. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" defer></script>
+<!-- xlsx.js / html2canvas / jspdf are NOT loaded here anymore. Together
+     they're ~1.5MB, and 95% of visits never click Export. They're now
+     lazy-loaded on first click of "Download Excel" / "Download PDF" via
+     ensureExcelLibs() / ensurePdfLibs() further down. -->
 <style>
 :root {
   --bg: #f4f1ec;
@@ -1120,21 +1124,71 @@ function parseField(val) {
   const n = Number(s);
   return isNaN(n) ? [] : [n];
 }
+// ── Lazy-loaded export libraries ──
+// xlsx.js / html2canvas / jspdf together are ~1.5MB and were previously
+// loaded on every page visit even though most visits never touch Export.
+// These helpers inject the <script> tag the first time it's actually
+// needed and cache the in-flight promise so a second click doesn't
+// re-download it.
+const _libLoadCache = {};
+function loadScript(src) {
+  if (_libLoadCache[src]) return _libLoadCache[src];
+  _libLoadCache[src] = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Failed to load ' + src));
+    document.head.appendChild(s);
+  });
+  return _libLoadCache[src];
+}
+async function ensureExcelLibs() {
+  if (typeof XLSX === 'undefined') {
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+  }
+}
+async function ensurePdfLibs() {
+  if (typeof html2canvas === 'undefined') {
+    await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+  }
+  if (typeof window.jspdf === 'undefined') {
+    await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+  }
+}
+// ── Safe JSON fetch ──
+// Google Apps Script returns HTTP 200 even when something is wrong — if the
+// deployment isn't set to "Anyone" access, or the script threw an error, it
+// serves an HTML sign-in/error page instead of JSON. fetch() succeeds and
+// res.json() then fails with a cryptic "Unexpected token '<'" error. This
+// wrapper reads the body as text first, sniffs for HTML, and throws a clear,
+// actionable message instead.
+async function fetchJsonSafe(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (trimmed.startsWith('<')) {
+    throw new Error('The survey backend returned a webpage instead of data. The Apps Script deployment likely needs to be redeployed with access set to "Anyone", or it hit a runtime error — check the Apps Script deployment settings.');
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('The survey backend returned data in an unexpected format.');
+  }
+}
 // Fetches the "Joining Details" sheet (action=getJoiners) and returns the
 // parsed rows (minus header), keyed positionally: EIN, Name, Department,
 // Date, Office, City, Recruiter (columns A–G). Never throws — returns an
 // empty array on any failure so filters/KPIs degrade gracefully.
 async function fetchJoinersData(webAppUrl) {
   try {
-    const res = await fetch(`${webAppUrl}?action=getJoiners`);
-    const rows = await res.json();
+    const rows = await fetchJsonSafe(`${webAppUrl}?action=getJoiners`);
     if (!Array.isArray(rows) || rows.length <= 1) return [];
     return rows.slice(1).map(row => ({
       ein: row[0], name: row[1], dept: row[2], date: row[3],
       office: row[4], city: row[5], recruiter: row[6]
     }));
   } catch (err) {
-    console.error('Joining Details fetch error:', err);
+    console.error('Joining Details fetch error:', err.message);
     return [];
   }
 }
@@ -1224,37 +1278,55 @@ async function renderDashboard() {
   body.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Loading analytics…</div>';
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz2tYy_KuVpqPFBkDqOBxj1eJc5y8RrYOkqDJe9qg3fGF3RYWOn2fin2uhe0BQT9q_jxw/exec';
   let all = [];
-  try {
-    const res = await fetch(WEB_APP_URL);
-    const rawData = await res.json();
-    const headers = rawData[0];
-    all = rawData.slice(1).map(row => {
-      let obj = {};
-      headers.forEach((h, i) => obj[h.trim()] = row[i]);
-      const arrayFields = [
-        'a_t1','a_t2','b_t3','b_t4','b_t5',
-        'c_t6','c_t7','d_t8','f_t9','g_t11','g_t12','o_r'
-      ];
-      arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
-      obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
-      obj.o_nps2 = obj.o_nps2 !== '' && obj.o_nps2 !== undefined ? Number(obj.o_nps2) : -1;
-      // ── Clean " - " from name fields (coerce to string first: some cells
-      //    (e.g. an all-numeric name/manager) come back as numbers, which have no .replace) ──
-      ['name','mgr','recruiter','onboarder'].forEach(f => {
-        if (obj[f] !== null && obj[f] !== undefined && obj[f] !== '')
-          // Collapse dashes AND any stray double-spacing (e.g. a typo like
-          // "Komal  Dev G D" from an older submission) down to a single
-          // space, so the same person always normalises to one identical
-          // string instead of showing up as two near-duplicate entries.
-          obj[f] = String(obj[f]).replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim();
+  // Fetch the main responses and the Joining Details sheet in PARALLEL.
+  // Each Apps Script call can take 1-4s on its own; fetching them one after
+  // another (the old behaviour) roughly doubled the wait before anything
+  // rendered. fetchJoinersData() already swallows its own errors and
+  // resolves to [], so Promise.all is safe here — the responses fetch is
+  // wrapped separately so a failure there doesn't cancel the joiners fetch.
+  const [responsesOutcome, joiners] = await Promise.all([
+    fetchJsonSafe(WEB_APP_URL).then(v => ({ ok: true, value: v })).catch(e => ({ ok: false, error: e })),
+    fetchJoinersData(WEB_APP_URL)
+  ]);
+  window._allJoinersData = joiners;
+  window._totalJoiners = joiners.length; // unfiltered grand total, used in Excel export
+  if (responsesOutcome.ok) {
+    try {
+      const rawData = responsesOutcome.value;
+      const headers = rawData[0];
+      all = rawData.slice(1).map(row => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = row[i]);
+        const arrayFields = [
+          'a_t1','a_t2','b_t3','b_t4','b_t5',
+          'c_t6','c_t7','d_t8','f_t9','g_t11','g_t12','o_r'
+        ];
+        arrayFields.forEach(f => { obj[f] = parseField(obj[f]); });
+        obj.o_nps = obj.o_nps !== '' && obj.o_nps !== undefined ? Number(obj.o_nps) : -1;
+        obj.o_nps2 = obj.o_nps2 !== '' && obj.o_nps2 !== undefined ? Number(obj.o_nps2) : -1;
+        // ── Clean " - " from name fields (coerce to string first: some cells
+        //    (e.g. an all-numeric name/manager) come back as numbers, which have no .replace) ──
+        ['name','mgr','recruiter','onboarder'].forEach(f => {
+          if (obj[f] !== null && obj[f] !== undefined && obj[f] !== '')
+            // Collapse dashes AND any stray double-spacing (e.g. a typo like
+            // "Komal  Dev G D" from an older submission) down to a single
+            // space, so the same person always normalises to one identical
+            // string instead of showing up as two near-duplicate entries.
+            obj[f] = String(obj[f]).replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim();
+        });
+        return obj;
       });
-      return obj;
-    });
-  } catch (err) {
-    console.error('Dashboard fetch error:', err);
+    } catch (err) {
+      console.error('Dashboard parse error:', err);
+      responsesOutcome.ok = false;
+      responsesOutcome.error = err;
+    }
+  }
+  if (!responsesOutcome.ok) {
+    console.error('Dashboard fetch error:', responsesOutcome.error);
     all = loadResponses();
     if (!all.length) {
-      body.innerHTML = `<div class="no-data"><h3>No data available</h3><p>${err.message}</p></div>`;
+      body.innerHTML = `<div class="no-data"><h3>No data available</h3><p>${escHtml(responsesOutcome.error.message)}</p></div>`;
       return;
     }
   }
@@ -1277,11 +1349,6 @@ async function renderDashboard() {
     r.onbLoc = locFor(r.onboarder) || 'Not Specified';
     if (!r.loc) r.loc = r.recLoc;
   });
-  // Full Joining Details rows — fetched once per dashboard load. The KPI card
-  // re-filters this client-side (Recruiter / Location / DOJ) on every render,
-  // same as the survey responses.
-  window._allJoinersData = await fetchJoinersData(WEB_APP_URL);
-  window._totalJoiners = window._allJoinersData.length; // unfiltered grand total, used in Excel export
   // Populate recruiter & location filter options — union of names found in
   // survey responses AND names found in Joining Details. A recruiter can
   // have joiners recorded before their first survey response comes back
@@ -1374,6 +1441,11 @@ function renderDashboardData(all) {
   // Joining Details has no onboarder column.
   const filteredJoiners = filterJoinersData(window._allJoinersData, window._activeRecruiterFilter, window._activeLocFilter, window._activeDojFrom, window._activeDojTo);
   const totalJoiners = filteredJoiners.length;
+  // Joiner headcount grouped by recruiter / by location — same filtered set
+  // above (respects whatever Recruiter/Location/DOJ filter is active), just
+  // bucketed for the two breakdown tables below.
+  const joinersByRecruiter = countBy(filteredJoiners, j => String(j.recruiter || '').replace(/\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim() || 'Not Assigned');
+  const joinersByLocation = countBy(filteredJoiners, j => String(j.city || '').trim() || 'Not Specified');
   // Section averages
   const secAvgs = [
     {l:'Recruiter Contact', v: avg(all.map(r=>avgArr(r.a_t1)))},
@@ -1424,7 +1496,8 @@ function renderDashboardData(all) {
     const enps2  = enpsScore(onbRows, 'o_nps2');
     const avgOv  = avg(recRows.map(r => avgArr(r.o_r)));
     const total  = new Set([...recRows, ...onbRows]).size; // distinct responses touching this city
-    return { loc, total, valid: valid.length, prom, pass, det, enps, promPct: valid.length ? Math.round((prom/valid.length)*100) : 0, valid2: valid2.length, prom2, pass2, det2, enps2, promPct2: valid2.length ? Math.round((prom2/valid2.length)*100) : 0, avgOv };
+    const joiners = joinersByLocation[loc] || 0;
+    return { loc, total, valid: valid.length, prom, pass, det, enps, promPct: valid.length ? Math.round((prom/valid.length)*100) : 0, valid2: valid2.length, prom2, pass2, det2, enps2, promPct2: valid2.length ? Math.round((prom2/valid2.length)*100) : 0, avgOv, joiners };
   });
   const recruiterNames = [...new Set(all.map(r => r.recruiter || 'Not Assigned'))].sort();
   const recruiterStats = recruiterNames.map(name => {
@@ -1444,7 +1517,9 @@ function renderDashboardData(all) {
     const avgNPSr   = avg(rows.map(r => r.o_nps).filter(v => v >= 0));
     const avgConf   = avg(rows.map(r => r.o_r[0]||0).filter(v => v > 0));
     const avgAlignR = avg(rows.map(r => r.o_r[2]||0).filter(v => v > 0));
-    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv, avgNPSr, avgConf, avgAlignR };
+    const joiners   = joinersByRecruiter[name] || 0;
+    const responseRate = joiners ? Math.round((rows.length / joiners) * 100) : null;
+    return { name, total: rows.length, valid: valid.length, prom, pass, det, enps, valid2: valid2.length, prom2, pass2, det2, enps2, avgRec, avgOv, avgNPSr, avgConf, avgAlignR, joiners, responseRate };
   });
   if (window._activeRecruiterFilter === undefined) window._activeRecruiterFilter = 'all';
   if (window._activeLocFilter === undefined) window._activeLocFilter = 'all';
@@ -1548,7 +1623,7 @@ function renderDashboardData(all) {
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>Recruiter</th><th>Responses</th>
+            <th>Recruiter</th><th>Joiners</th><th>Responses</th><th>Response Rate</th>
             <th>Rec. Promoters</th><th>Rec. Passives</th><th>Rec. Detractors</th><th>eNPS (Recruiting)</th>
             <th>Onb. Promoters</th><th>Onb. Passives</th><th>Onb. Detractors</th><th>eNPS (Onboarding)</th>
             <th>Avg NPS Score</th><th>Avg Confidence</th><th>Avg Alignment</th>
@@ -1560,7 +1635,9 @@ function renderDashboardData(all) {
             const enpsColor2 = s.enps2 === null ? 'var(--muted)' : s.enps2 >= 50 ? 'var(--green)' : s.enps2 >= 0 ? '#d97706' : '#dc2626';
             return `<tr>
             <td><strong>${escHtml(s.name)}</strong></td>
+            <td>${s.joiners}</td>
             <td>${s.total}</td>
+            <td>${s.responseRate === null ? '—' : `<span style="font-weight:600;color:${s.responseRate>=100?'var(--green)':s.responseRate>=50?'#d97706':'#dc2626'}">${s.responseRate}%</span>`}</td>
             <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.prom/s.valid)*100) : 0}%)</span></td>
             <td><span class="badge y">${s.pass}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.pass/s.valid)*100) : 0}%)</span></td>
             <td><span class="badge r">${s.det}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.det/s.valid)*100) : 0}%)</span></td>
@@ -1618,7 +1695,7 @@ function renderDashboardData(all) {
       <div class="resp-table-wrap">
         <table class="resp-table">
           <thead><tr>
-            <th>Location</th><th>Responses</th>
+            <th>Location</th><th>Joiners</th><th>Responses</th>
             <th>Recruiting Promoters</th><th>Recruiting Passives</th><th>Recruiting Detractors</th>
             <th>Recruiting eNPS</th><th>Recruiting Promoter Rate</th>
             <th>Onboarding Promoters</th><th>Onboarding Passives</th><th>Onboarding Detractors</th>
@@ -1631,6 +1708,7 @@ function renderDashboardData(all) {
               const ec2 = s.enps2 === null ? 'var(--muted)' : s.enps2 >= 50 ? 'var(--green)' : s.enps2 >= 0 ? '#d97706' : '#dc2626';
               return `<tr>
               <td><strong>${escHtml(s.loc)}</strong></td>
+              <td>${s.joiners}</td>
               <td>${s.total}</td>
               <td><span class="badge g">${s.prom}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.prom/s.valid)*100) : 0}%)</span></td>
               <td><span class="badge y">${s.pass}</span> <span style="font-size:11px;color:var(--muted)">(${s.valid ? Math.round((s.pass/s.valid)*100) : 0}%)</span></td>
@@ -1755,8 +1833,11 @@ function renderDashboardData(all) {
       </div>
     </div>
   `;
-  // Populate dropdowns after render
-  setTimeout(() => {
+  // Populate dropdowns after render. Runs on the next animation frame
+  // instead of after an arbitrary 400ms delay — the DOM already exists
+  // synchronously right after the innerHTML assignment above, so the old
+  // delay was pure dead time on every render and every filter change.
+  requestAnimationFrame(() => {
     const recEl = document.getElementById('recruiter-filter');
     if (recEl && window._allRecruiters && window._allRecruiters.length) {
       recEl.innerHTML = `<option value="all">All Recruiters</option>` +
@@ -1788,9 +1869,10 @@ function renderDashboardData(all) {
     // The dashboard has now had a full render + correction pass. From this
     // point on, a change on the month field is trusted as a real user pick.
     window._dashSettled = true;
-  }, 400);
-  // ── Draw charts ──
- setTimeout(() => {
+  });
+  // ── Draw charts ── (runs on the next animation frame instead of after an
+  // arbitrary 100ms delay — same reasoning as the dropdown block above)
+  requestAnimationFrame(() => {
     // Section bar
     const secChart = new Chart(document.getElementById('ch-sections'), {
       type:'bar',
@@ -1869,7 +1951,7 @@ function renderDashboardData(all) {
       type:'doughnut',
       data:{
         labels:Object.keys(srcCount),
-        datasets:[{data:Object.values(srcCount),backgroundColor:['#152d4a','#c9581e','#e07b3c','#4a90d9','#2d7a5f','#8b5cf6'],borderWidth:0}]
+        datasets:[{data:Object.values(srcCount),backgroundColor:Object.keys(srcCount).map((l,i)=>colorForSrc(l,i)),borderWidth:0}]
       },
       options:{
         responsive:true,maintainAspectRatio:false,
@@ -1992,18 +2074,20 @@ function renderDashboardData(all) {
       plugins:[ChartDataLabels]
     });
     activeCharts.push(feelChart);
-  }, 100);
+  });
 }
 // ═══════════ EXCEL EXPORT ═══════════
-function exportToExcel() {
+async function exportToExcel() {
   if (!globalAllData.length) {
     alert('No data loaded yet. Please wait for the dashboard to finish loading.');
     return;
   }
   const btn = document.querySelector('.btn-export');
   btn.disabled = true;
-  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Preparing…`;
   try {
+    await ensureExcelLibs(); // downloads xlsx.js on first use only
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
     const wb = XLSX.utils.book_new();
     // ── Sheet 1: All Responses ──
     const responseRows = globalAllData.map((r, i) => ({
@@ -2139,9 +2223,11 @@ async function exportToPDF() {
   const originalHTML = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Preparing…`;
   }
   try {
+    await ensurePdfLibs(); // downloads html2canvas + jspdf on first use only
+    if (btn) btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Exporting…`;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'pt', 'a4');
     const margin = 24;
@@ -2149,11 +2235,9 @@ async function exportToPDF() {
     const pageHeight = pdf.internal.pageSize.getHeight();
     const usableWidth = pageWidth - margin * 2;
     const usableHeight = pageHeight - margin * 2;
-
     const sections = Array.from(target.children);
     let cursorY = margin;
     let pageHasContent = false;
-
     for (const section of sections) {
       if (!section || section.offsetHeight === 0) continue;
       const restore = unclipScrollables(section);
@@ -2177,7 +2261,6 @@ async function exportToPDF() {
       } finally {
         restore();
       }
-
       // Scale the whole section image down (never crop) so it fits the page width.
       let imgWidth = usableWidth;
       let imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -2207,7 +2290,6 @@ async function exportToPDF() {
         }
         continue;
       }
-
       if (pageHasContent && cursorY + imgHeight > pageHeight - margin) {
         pdf.addPage();
         cursorY = margin;
@@ -2217,7 +2299,6 @@ async function exportToPDF() {
       cursorY += imgHeight + 10;
       pageHasContent = true;
     }
-
     const date = new Date().toISOString().slice(0, 10);
     pdf.save(`Urbanrise_Onboarding_Dashboard_${date}.pdf`);
   } catch (e) {
@@ -2252,6 +2333,25 @@ function enpsScore(rows, field) {
 }
 function countBy(arr, fn) {
   return arr.reduce((acc,r)=>{ const k=fn(r); acc[k]=(acc[k]||0)+1; return acc; },{});
+}
+// ── Source of Application chart colors ──
+// Object.keys(srcCount) is ordered by first appearance in the data, not by
+// a fixed list, so a plain positional color array could put any color on
+// "Job Portal" depending on which source happened to show up first. This
+// maps each known source label to a fixed color so "Job Portal" always
+// renders as #FB33EE regardless of data order; anything unrecognised falls
+// back to the original palette.
+const SRC_COLOR_MAP = {
+  'Job Portal': '#FB33EE',
+  'LinkedIn': '#152d4a',
+  'Referral': '#2d7a5f',
+  'Campus': '#4a90d9',
+  'Direct Approach': '#e07b3c',
+  'Other': '#8b5cf6'
+};
+const SRC_FALLBACK_COLORS = ['#152d4a','#c9581e','#e07b3c','#4a90d9','#2d7a5f','#8b5cf6'];
+function colorForSrc(label, idx) {
+  return SRC_COLOR_MAP[label] || SRC_FALLBACK_COLORS[idx % SRC_FALLBACK_COLORS.length];
 }
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
